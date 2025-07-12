@@ -1,0 +1,275 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    background-color: #000000;
+    color: #FFFFFF;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    min-height: 100vh;
+    justify-content: center;
+    align-items: center;
+    gap: 100px;
+    padding: 40px 20px;
+}
+
+.login-form-wrapper {
+    flex: 1;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-form h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.login-form p.subtitle {
+    color: #a0a0a0;
+    margin-bottom: 40px;
+}
+
+.login-image {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #111;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+.img-full {
+    width: 100%;
+    height: 100%;
+    
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #FFFFFF;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.form-input::placeholder {
+    color: #6c757d;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #07C160;
+}
+
+.password-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+a.forgot-password {
+    font-size: 0.8rem;
+    color: #a0a0a0;
+    text-decoration: none;
+}
+
+a.forgot-password:hover {
+    color: #FFFFFF;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 14px;
+    background-color: #07C160;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+}
+
+.btn-login:hover {
+    background-color: #06a854;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #a0a0a0;
+}
+
+.remember-me input {
+    margin-right: 8px;
+}
+
+.social-login {
+    display: flex;
+    gap: 15px;
+    margin-top: 40px;
+}
+
+.btn-social {
+    flex: 1;
+    padding: 12px;
+    background-color: transparent;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background-color 0.3s;
+}
+
+.btn-social:hover {
+    background-color: #1a1a1a;
+}
+
+.signup-link {
+    margin-top: 40px;
+    text-align: center;
+    color: #a0a0a0;
+}
+
+.signup-link a {
+    color: #FFFFFF;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+@media (max-width: 1024px) {
+    .login-container {
+        gap: 60px;
+        padding: 30px 15px;
+    }
+
+    .login-image {
+        max-width: 400px;
+        height: 500px;
+    }
+
+    .login-form h1 {
+        font-size: 2.2rem;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+        gap: 30px;
+        padding: 20px 15px;
+        min-height: 100vh;
+        justify-content: flex-start;
+        padding-top: 40px;
+    }
+
+    .login-image {
+        max-width: 300px;
+        height: 300px;
+        margin-bottom: 20px;
+    }
+
+    .login-form-wrapper {
+        width: 100%;
+        max-width: 350px;
+    }
+
+    .login-form h1 {
+        font-size: 2rem;
+        margin-bottom: 8px;
+    }
+
+    .login-form p.subtitle {
+        margin-bottom: 30px;
+        font-size: 0.9rem;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .social-login {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 30px;
+    }
+
+    .btn-social {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        padding: 15px 10px;
+        gap: 20px;
+    }
+
+    .login-image {
+        max-width: 250px;
+        height: 250px;
+    }
+
+    .login-form-wrapper {
+        max-width: 300px;
+    }
+
+    .login-form h1 {
+        font-size: 1.8rem;
+    }
+
+    .btn-login {
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+
+    .form-input {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+    }
+
+    .signup-link {
+        margin-top: 30px;
+        font-size: 0.9rem;
+    }
+}

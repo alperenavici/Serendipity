@@ -8,6 +8,12 @@ public class AccountController : Controller
         return View();
     }
 
+    [HttpGet]
+    public IActionResult Register()
+    {
+        return View();
+    }
+
     [HttpPost]
     public IActionResult Login(string username, string password, bool rememberMe)
     {
