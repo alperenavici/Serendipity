@@ -17,3 +17,5 @@ namespace ConversationApp.Entity.Entites
         public virtual User User { get; set; }
     }
 }
+
+

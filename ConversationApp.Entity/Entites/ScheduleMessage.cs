@@ -10,12 +10,12 @@ namespace ConversationApp.Entity.Entites
     {
         public Guid Id { get; set; }
         public string MessageText { get; set; }
-        public string ScheduledTime { get; set; } // ISO 8601 
+        public string ScheduledTime { get; set; } 
         public Guid? TargetUserId { get; set; } 
         public bool IsEnabled { get; set; } 
 
         public DateTime ScheduledSentTime {get; set; }
-        public int Status { get; set; } // 0: Pending, 1: Sent, 2: Failed
+        public int Status { get; set; } 
         public DateTime? SentTime { get; set; }
         public DateTime CreationDate { get; set; }
 

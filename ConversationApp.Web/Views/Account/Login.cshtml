@@ -1,0 +1,65 @@
+@{
+    ViewData["Title"] = "Login";
+    Layout = null; 
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ConversationApp</title>
+    <link rel="stylesheet" href="~/css/login.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-image">
+            <img src="~/img/login-bg.png" alt="Background" class="img-full" />
+        </div>
+
+        <div class="login-form-wrapper">
+            <form asp-action="Login" asp-controller="Account" method="post" class="login-form">
+                <h1>Welcome back!</h1>
+                <p class="subtitle">Enter your Credentials to access your account</p>
+
+                <div class="form-group">
+                    <label for="Email">Email address</label>
+                    <input type="email" id="Email" placeholder="Enter your email" name="Email" class="form-input" required />
+                </div>
+
+                <div class="form-group">
+                    <div class="password-header">
+                        <label for="Password">Password</label>
+                        <a href="#" class="forgot-password">forgot password</a>
+                    </div>
+                    <input type="password" id="Password" placeholder="Name" name="Password" class="form-input" required />
+                </div>
+
+                <div class="remember-me">
+                    <input type="checkbox" id="RememberMe" name="RememberMe" checked />
+                    <label for="RememberMe">Remember me</label>
+                </div>
+                
+                <button type="submit" class="btn-login">Login</button>
+                
+                <div class="social-login">
+                    <button type="button" class="btn-social">
+                        <i class="fab fa-google"></i> Sign in with Google
+                    </button>
+                    <button type="button" class="btn-social">
+                        <i class="fab fa-apple"></i> Sign in with Apple
+                    </button>
+                </div>
+
+                <div class="signup-link">
+                    Don't have an account? <a asp-action="Register" asp-controller="Account">Sign Up</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+    
+
+</body>
+</html>

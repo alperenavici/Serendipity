@@ -23,4 +23,8 @@
     <ProjectReference Include="..\ConversationApp.Data\ConversationApp.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\img\" />
+  </ItemGroup>
+
 </Project>
