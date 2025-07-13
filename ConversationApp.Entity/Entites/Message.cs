@@ -9,7 +9,7 @@ namespace ConversationApp.Entity.Entites
     public class Message
     {
         public Guid Id { get; set; }
-        public int ConversationId { get; set; }
+        public Guid ConversationId { get; set; }
         public Guid UserId { get; set; }
         public string Content { get; set; }
         public DateTime SentDate{ get; set; }

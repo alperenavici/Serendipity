@@ -10,7 +10,7 @@ namespace ConversationApp.Entity.Entites
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
-        public int ConversationId { get; set; }
+        public Guid ConversationId { get; set; }
         public DateTime JoinedDate { get; set; }
         public bool IsDeleted { get; set; }
 

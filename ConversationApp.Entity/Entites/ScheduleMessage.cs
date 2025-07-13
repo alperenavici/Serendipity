@@ -12,6 +12,7 @@ namespace ConversationApp.Entity.Entites
         public string MessageText { get; set; }
         public string ScheduledTime { get; set; } 
         public Guid? TargetUserId { get; set; } 
+        public Guid CreatedByUserId { get; set; }
         public bool IsEnabled { get; set; } 
 
         public DateTime ScheduledSentTime {get; set; }

@@ -12,9 +12,7 @@ namespace ConversationApp.Entity.Entites
         public string Title { get; set; }
         public int Type { get; set; } // 0: Private, 1: Group
         public DateTime CreationDate { get; set; }
-        public long? LastMessageId { get; set; }
 
-        public virtual Message LastMessage { get; set; }
         public virtual ICollection<ConversationParticipant> Participants { get; set; }
         public virtual ICollection<Message> Messages { get; set; }
         public Conversation()
