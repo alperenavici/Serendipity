@@ -99,21 +99,14 @@ html {
     flex-shrink: 0;
 }
 
-.search-section {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
 .search-bar {
     position: relative;
-    flex-grow: 1;
+    margin-bottom: 15px;
 }
 
 .search-bar input {
     width: 100%;
-    padding: 10px 15px 10px 40px;
+    padding: 10px 50px 10px 40px;
     border-radius: 20px;
     border: none;
     background-color: var(--bg-white);
@@ -130,6 +123,10 @@ html {
 }
 
 .refresh-button {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
     cursor: pointer;
@@ -142,13 +139,12 @@ html {
     justify-content: center;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0;
 }
 
 .refresh-button:hover {
     background-color: var(--primary-blue);
     color: white;
-    transform: rotate(180deg);
+    transform: translateY(-50%) rotate(180deg);
 }
 
 .refresh-button i {

@@ -5,6 +5,7 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult Login()
     {
+        
         return View();
     }
 
@@ -20,7 +21,11 @@ public class AccountController : Controller
     {
         return View();
     }
-
+    [HttpGet]
+    public IActionResult Admin()
+    {
+        return View();
+    }
     [HttpPost]
     public IActionResult Login(string username, string password, bool rememberMe)
     {
