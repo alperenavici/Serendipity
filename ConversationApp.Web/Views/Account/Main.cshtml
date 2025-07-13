@@ -1,0 +1,154 @@
+@{
+    ViewData["Title"] = "Sohbet";
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ConversationApp</title>
+    <link rel="stylesheet" href="~/css/main.css" />
+</head>
+
+<div class="chat-container">
+
+    <aside class="chat-sidebar">
+        <div class="user-profile">
+            <img src="https://i.pravatar.cc/150?u=david" alt="David Peters">
+            <div class="user-info">
+                <h5>David Peters</h5>
+                <p>Senior Developer</p>
+            </div>
+            <i class="fa-solid fa-pen-to-square edit-icon"></i>
+        </div>
+
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search Here...">
+        </div>
+
+        <ul class="conversation-list">
+            <li class="conversation-list-item active">
+                <img src="https://i.pravatar.cc/150?u=lisa" alt="Lisa Roy">
+                <div class="conversation-details">
+                    <div class="conversation-header">
+                        <span class="name">Lisa Roy</span>
+                        <span class="time">10:35 AM</span>
+                    </div>
+                    <p class="last-message">Hi, are you Available Tomorrow?</p>
+                </div>
+                <div class="unread-badge">1</div>
+            </li>
+            <li class="conversation-list-item">
+                <img src="https://i.pravatar.cc/150?u=jamie" alt="Jamie Taylor">
+                <div class="conversation-details">
+                    <div class="conversation-header">
+                        <span class="name">Jamie Taylor</span>
+                        <span class="time">10:35 AM</span>
+                    </div>
+                    <p class="last-message">Nice One. Will Do it tommorow</p>
+                </div>
+                <div class="unread-badge">3</div>
+            </li>
+            <!-- Diğer sohbetler buraya eklenebilir -->
+        </ul>
+    </aside>
+
+    <!-- ORTA SÜTUN: ANA SOHBET EKRANI -->
+    <main class="chat-main">
+        <header class="chat-header">
+            <img src="https://i.pravatar.cc/150?u=dianne" alt="Dianne Jhonson">
+            <span class="name">Dianne Jhonson</span>
+            <div class="actions">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <i class="fa-regular fa-heart"></i>
+                <i class="fa-regular fa-bell"></i>
+            </div>
+        </header>
+
+        <div class="message-area">
+            <div class="message incoming">
+                <img class="avatar" src="https://i.pravatar.cc/150?u=dianne" alt="Dianne">
+                <div class="message-bubble">Hi David, have you got the project report pdf?</div>
+            </div>
+
+            <div class="message outgoing">
+                <div class="message-bubble">NO, I did not get it</div>
+                <img class="avatar" src="https://i.pravatar.cc/150?u=david" alt="David">
+            </div>
+            
+            <div class="date-separator">Yesterday</div>
+
+            <div class="message incoming">
+                <img class="avatar" src="https://i.pravatar.cc/150?u=dianne" alt="Dianne">
+                <div class="message-bubble">Ok, I will just sent it here. Plz be sure to fill the details by today end of the day.</div>
+            </div>
+
+             <!-- Diğer mesajlar buraya eklenebilir -->
+
+        </div>
+
+        <footer class="chat-composer">
+            <div class="composer-actions">
+                <i class="fa-solid fa-microphone"></i>
+            </div>
+            <input type="text" placeholder="Write Something...">
+            <div class="composer-actions">
+                <i class="fa-solid fa-paperclip"></i>
+                <i class="fa-solid fa-camera"></i>
+                <i class="fa-regular fa-face-smile"></i>
+            </div>
+            <button class="send-button">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </footer>
+    </main>
+
+    <!-- SAĞ SÜTUN: KULLANICI BİLGİ PANELİ -->
+    <aside class="chat-info-panel">
+        <img src="https://i.pravatar.cc/150?u=dianne" alt="Dianne Jhonson" class="profile-pic">
+        <h5 class="name">Dianne Jhonson</h5>
+        <p class="title">Junior Developer</p>
+
+        <div class="action-links">
+            <a href="#"><i class="fa-solid fa-user-group"></i> View Friends</a>
+            <a href="#"><i class="fa-regular fa-heart"></i> Add to Favorites</a>
+        </div>
+
+        <div class="attachments-section">
+            <h6>Attachments</h6>
+            <div class="attachment-grid">
+                <div class="attachment-item"> <i class="fa-solid fa-file-pdf"></i> <p>PDF</p> </div>
+                <div class="attachment-item"> <i class="fa-solid fa-film"></i> <p>VIDEO</p> </div>
+                <div class="attachment-item"> <i class="fa-solid fa-music"></i> <p>MP3</p> </div>
+                <div class="attachment-item"> <i class="fa-solid fa-image"></i> <p>IMAGE</p> </div>
+            </div>
+            <button class="btn-view-all">View All</button>
+        </div>
+    </aside>
+
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const conversationItems = document.querySelectorAll('.conversation-list-item');
+
+            conversationItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Önce mevcut aktif olanı bul ve 'active' sınıfını kaldır
+                    const currentActive = document.querySelector('.conversation-list-item.active');
+                    if (currentActive) {
+                        currentActive.classList.remove('active');
+                    }
+                    // Tıklanan öğeye 'active' sınıfını ekle
+                    this.classList.add('active');
+
+                    // Buraya, tıklanan sohbete ait mesajları getirecek API çağrısı eklenecek.
+                });
+            });
+        });
+    </script>
+}

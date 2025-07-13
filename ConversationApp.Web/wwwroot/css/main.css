@@ -1,0 +1,568 @@
+/* --- Universal Reset --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* --- CSS Değişkenleri (Renk ve Stil Yönetimi) --- */
+:root {
+    --bg-light: #F7F9FB;
+    --bg-white: #FFFFFF;
+    --primary-blue: #007BFF;
+    --border-color: #E9ECEF;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --text-tertiary: #adb5bd;
+    --font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* --- Genel Sayfa Yapısı --- */
+body,
+html {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100%;
+    font-family: var(--font-family);
+    background-color: var(--bg-light);
+    overflow: hidden;
+    min-width: 320px;
+    position: relative;
+}
+
+.chat-container {
+    display: grid;
+    grid-template-columns: 280px 1fr 220px;
+    height: 100vh;
+    width: 100vw;
+    max-width: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.chat-sidebar {
+    background-color: var(--bg-light);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    box-sizing: border-box;
+    overflow: hidden;
+    width: 280px;
+    min-width: 280px;
+    margin: 0;
+    position: relative;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.user-profile img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.user-profile .user-info {
+    flex-grow: 1;
+}
+
+.user-profile .user-info h5 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.user-profile .user-info p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.user-profile .edit-icon {
+    margin-left: auto;
+    color: var(--text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.search-bar {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border-radius: 20px;
+    border: none;
+    background-color: var(--bg-white);
+    box-sizing: border-box;
+    outline: none;
+}
+
+.search-bar .fa-magnifying-glass {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+}
+
+.conversation-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    margin: 0 -15px;
+}
+
+.conversation-list-item {
+    display: flex;
+    padding: 15px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+    align-items: center;
+}
+
+.conversation-list-item:hover,
+.conversation-list-item.active {
+    background-color: var(--bg-white);
+}
+
+.conversation-list-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.conversation-details {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.conversation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.conversation-header .name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.conversation-header .time {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+}
+
+.last-message {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.unread-badge {
+    background-color: var(--primary-blue);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 10px;
+    flex-shrink: 0;
+}
+
+/* --- Orta Sütun: Ana Sohbet Alanı --- */
+.chat-main {
+    background-color: var(--bg-white);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: 0;
+    position: relative;
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.chat-header img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.chat-header .name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    flex-grow: 1;
+}
+
+.chat-header .actions {
+    margin-left: auto;
+    display: flex;
+    gap: 20px;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+}
+
+.chat-header .actions i {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.chat-header .actions i:hover {
+    color: var(--primary-blue);
+}
+
+.message-area {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.message {
+    display: flex;
+    align-items: flex-end;
+}
+
+.message .avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.message-bubble {
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 60%;
+    font-size: 0.95rem;
+    word-wrap: break-word;
+}
+
+.message.outgoing {
+    justify-content: flex-end;
+}
+
+.message.outgoing .message-bubble {
+    background-color: var(--primary-blue);
+    color: white;
+    border-top-right-radius: 5px;
+}
+
+.message.outgoing .avatar {
+    order: 2;
+    margin-right: 0;
+    margin-left: 10px;
+}
+
+.message.incoming .message-bubble {
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+    border-top-left-radius: 5px;
+}
+
+.date-separator {
+    text-align: center;
+    margin: 20px 0;
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+}
+
+/* --- Mesaj Yazma Alanı --- */
+.chat-composer {
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--bg-light);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+.chat-composer input {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 22px;
+    background-color: var(--bg-white);
+    outline: none;
+}
+
+.chat-composer .composer-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-composer .composer-actions i,
+.chat-composer .send-button i {
+    font-size: 1.4rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.chat-composer .composer-actions i:hover {
+    color: var(--primary-blue);
+}
+
+.chat-composer .send-button {
+    background-color: var(--primary-blue);
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.chat-composer .send-button:hover {
+    background-color: #0056b3;
+}
+
+.chat-composer .send-button i {
+    color: white;
+}
+
+/* --- Sağ Sütun: Bilgi Paneli --- */
+.chat-info-panel {
+    background-color: var(--bg-light);
+    border-left: 1px solid var(--border-color);
+    padding: 20px 20px 20px 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    width: 220px;
+    min-width: 220px;
+    box-sizing: border-box;
+    margin: 0;
+    position: relative;
+}
+
+.chat-info-panel .profile-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+}
+
+.chat-info-panel .name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+}
+
+.chat-info-panel .title {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.chat-info-panel .action-links {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.chat-info-panel .action-links a {
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    padding: 10px 10px 10px 5px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.chat-info-panel .action-links a:hover {
+    background-color: var(--bg-white);
+}
+
+.chat-info-panel .action-links i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+.attachments-section {
+    margin-top: 30px;
+    text-align: left;
+    padding-left: 0;
+}
+
+.attachments-section h6 {
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+}
+
+.attachment-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.attachment-item {
+    background-color: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.attachment-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.attachment-item i {
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+}
+
+.attachment-item p {
+    margin: 10px 0 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.btn-view-all {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 8px 20px;
+    margin-top: 20px;
+    cursor: pointer;
+    width: 100%;
+    color: var(--text-primary);
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.btn-view-all:hover {
+    background-color: var(--bg-white);
+    border-color: var(--primary-blue);
+}
+
+/* --- Responsive Tasarım --- */
+@media (max-width: 1200px) {
+    .chat-container {
+        grid-template-columns: 280px 1fr;
+    }
+
+    .chat-info-panel {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .chat-container {
+        grid-template-columns: 1fr;
+    }
+
+    .chat-sidebar {
+        display: none;
+    }
+
+    .chat-header {
+        padding: 10px 15px;
+    }
+
+    .message-area {
+        padding: 15px;
+    }
+
+    .chat-composer {
+        padding: 10px 15px;
+    }
+
+    .message-bubble {
+        max-width: 80%;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-composer input {
+        padding: 10px 12px;
+    }
+
+    .chat-composer .send-button {
+        width: 36px;
+        height: 36px;
+    }
+
+    .message-bubble {
+        max-width: 90%;
+        font-size: 0.9rem;
+    }
+}
+
+/* --- Scrollbar Düzenlemeleri --- */
+.conversation-list::-webkit-scrollbar,
+.message-area::-webkit-scrollbar,
+.chat-info-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.conversation-list::-webkit-scrollbar-track,
+.message-area::-webkit-scrollbar-track,
+.chat-info-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.conversation-list::-webkit-scrollbar-thumb,
+.message-area::-webkit-scrollbar-thumb,
+.chat-info-panel::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.conversation-list::-webkit-scrollbar-thumb:hover,
+.message-area::-webkit-scrollbar-thumb:hover,
+.chat-info-panel::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+}
