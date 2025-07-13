@@ -5,11 +5,11 @@
     box-sizing: border-box;
 }
 
-/* --- CSS Değişkenleri (Renk ve Stil Yönetimi) --- */
+
 :root {
     --bg-light: #F7F9FB;
     --bg-white: #FFFFFF;
-    --primary-blue: #007BFF;
+    --primary-blue: #090909;
     --border-color: #E9ECEF;
     --text-primary: #212529;
     --text-secondary: #6c757d;
@@ -17,7 +17,7 @@
     --font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* --- Genel Sayfa Yapısı --- */
+
 body,
 html {
     margin: 0;
@@ -35,7 +35,7 @@ html {
     display: grid;
     grid-template-columns: 280px 1fr 220px;
     height: 100vh;
-    width: 100vw;
+    width: 95vw;
     max-width: 100%;
     overflow: hidden;
     margin: 0;
@@ -199,7 +199,7 @@ html {
     flex-shrink: 0;
 }
 
-/* --- Orta Sütun: Ana Sohbet Alanı --- */
+
 .chat-main {
     background-color: var(--bg-white);
     display: flex;
@@ -366,7 +366,7 @@ html {
     color: white;
 }
 
-/* --- Sağ Sütun: Bilgi Paneli --- */
+
 .chat-info-panel {
     background-color: var(--bg-light);
     border-left: 1px solid var(--border-color);
@@ -488,7 +488,6 @@ html {
     border-color: var(--primary-blue);
 }
 
-/* --- Responsive Tasarım --- */
 @media (max-width: 1200px) {
     .chat-container {
         grid-template-columns: 280px 1fr;
