@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ConversationApp.Entity.Entites;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace ConversationApp.Data.Context
 {
-    public class ApplicationDbContext:DbContext
+    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options):base(options)
         { }
 
-        public DbSet<User> Users { get; set; }
+
         public DbSet<Conversation> Conversations { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<ConversationParticipant> ConversationParticipants { get; set; }
@@ -22,17 +24,17 @@ namespace ConversationApp.Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // User entity configuration
+            
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(u => u.Id);
-                entity.Property(u => u.Username).IsRequired().HasMaxLength(50);
-                entity.Property(u => u.email).IsRequired().HasMaxLength(100);
+                entity.Property(u => u.UserName).IsRequired().HasMaxLength(50);
+                entity.Property(u => u.Email).IsRequired().HasMaxLength(100);
                 entity.Property(u => u.PasswordHash).IsRequired();
                 entity.Property(u => u.CreationDate).IsRequired();
             });
 
-            // Conversation entity configuration
+           
             modelBuilder.Entity<Conversation>(entity =>
             {
                 entity.HasKey(c => c.Id);
@@ -40,7 +42,7 @@ namespace ConversationApp.Data.Context
                 entity.Property(c => c.CreationDate).IsRequired();
             });
 
-            // Message entity configuration
+ 
             modelBuilder.Entity<Message>(entity =>
             {
                 entity.HasKey(m => m.Id);
@@ -58,7 +60,6 @@ namespace ConversationApp.Data.Context
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // ConversationParticipant entity configuration
             modelBuilder.Entity<ConversationParticipant>(entity =>
             {
                 entity.HasKey(cp => cp.Id);
@@ -75,7 +76,6 @@ namespace ConversationApp.Data.Context
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // MessageReadReceipt entity configuration
             modelBuilder.Entity<MessageReadReceipt>(entity =>
             {
                 entity.HasKey(mrr => mrr.Id);
@@ -92,7 +92,6 @@ namespace ConversationApp.Data.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // ScheduleMessage entity configuration
             modelBuilder.Entity<ScheduleMessage>(entity =>
             {
                 entity.HasKey(sm => sm.Id);

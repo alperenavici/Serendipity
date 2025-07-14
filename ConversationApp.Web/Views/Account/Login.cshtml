@@ -1,3 +1,4 @@
+@model Conversation.Core.DTo.LoginDto
 @{
     ViewData["Title"] = "Login";
     Layout = null; 
@@ -23,22 +24,41 @@
                 <h1>Welcome back!</h1>
                 <p class="subtitle">Enter your Credentials to access your account</p>
 
+                @if (ViewBag.Error != null)
+                {
+                    <div class="message-container message-error">
+                        @ViewBag.Error
+                    </div>
+                }
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="message-container message-error">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <p>@error.ErrorMessage</p>
+                        }
+                    </div>
+                }
+
                 <div class="form-group">
-                    <label for="Email">Email address</label>
-                    <input type="email" id="Email" placeholder="Enter your email" name="Email" class="form-input" required />
+                    <label asp-for="Email">Email address</label>
+                    <input asp-for="Email" type="email" placeholder="Enter your email" class="form-input" required />
+                    <span asp-validation-for="Email" class="validation-error"></span>
                 </div>
 
                 <div class="form-group">
                     <div class="password-header">
-                        <label for="Password">Password</label>
+                        <label asp-for="Password">Password</label>
                         <a href="#" class="forgot-password">forgot password</a>
                     </div>
-                    <input type="password" id="Password" placeholder="Name" name="Password" class="form-input" required />
+                    <input asp-for="Password" type="password" placeholder="Enter your password" class="form-input" required />
+                    <span asp-validation-for="Password" class="validation-error"></span>
                 </div>
 
                 <div class="remember-me">
-                    <input type="checkbox" id="RememberMe" name="RememberMe" checked />
-                    <label for="RememberMe">Remember me</label>
+                    <input asp-for="RememberMe" type="checkbox" checked />
+                    <label asp-for="RememberMe">Remember me</label>
                 </div>
                 
                 <button type="submit" class="btn-login">Login</button>

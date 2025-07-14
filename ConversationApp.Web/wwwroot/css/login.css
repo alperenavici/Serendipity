@@ -239,6 +239,110 @@ a.forgot-password:hover {
     }
 }
 
+/* Message Styles */
+.message-container {
+    margin-bottom: 20px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    position: relative;
+    animation: slideDown 0.3s ease-out;
+}
+
+.message-success {
+    background-color: rgba(7, 193, 96, 0.1);
+    border: 1px solid rgba(7, 193, 96, 0.3);
+    color: #07C160;
+    box-shadow: 0 4px 12px rgba(7, 193, 96, 0.1);
+}
+
+.message-success::before {
+    content: "✓";
+    display: inline-block;
+    margin-right: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.message-error {
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    color: #ff6b6b;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
+}
+
+.message-error::before {
+    content: "⚠";
+    display: inline-block;
+    margin-right: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.message-error p {
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+}
+
+.message-error p+p {
+    margin-top: 8px;
+}
+
+/* Individual field validation errors */
+.validation-error {
+    display: block;
+    color: #ff6b6b;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    margin-left: 2px;
+    font-weight: 400;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.validation-error:empty {
+    display: none;
+}
+
+.form-input.input-validation-error {
+    border-color: rgba(255, 107, 107, 0.5);
+    box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments for messages */
+@media (max-width: 768px) {
+    .message-container {
+        padding: 14px 16px;
+        font-size: 0.85rem;
+        margin-bottom: 16px;
+    }
+}
+
 @media (max-width: 480px) {
     .login-container {
         padding: 15px 10px;

@@ -1,23 +1,17 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConversationApp.Entity.Entites
 {
-    public class User
+    public class User : IdentityUser<Guid>
     {
-        public Guid Id { get; set; }
-        public string Username { get; set; }
-        public string email { get; set; }
-        public string PasswordHash{ get; set; }
         public int Role { get; set; } // 0: User, 1: Admin
         public DateTime CreationDate { get; set; }
         public bool IsBanned { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime? DeletedOn { get; set; }
+
         public virtual ICollection<ConversationParticipant> ConversationParticipants { get; set; }
         public virtual ICollection<Message> SentMessages { get; set; }
         public virtual ICollection<MessageReadReceipt> ReadReceipts { get; set; }
@@ -32,8 +26,5 @@ namespace ConversationApp.Entity.Entites
             CreatedScheduledMessages = new HashSet<ScheduleMessage>();
             TargetedScheduledMessages = new HashSet<ScheduleMessage>();
         }
-    
-
-
     }
 }

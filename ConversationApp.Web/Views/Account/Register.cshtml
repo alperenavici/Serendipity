@@ -1,3 +1,4 @@
+@model Conversation.Core.DTo.RegisterDto
 @{
     ViewData["Title"] = "Register";
     Layout = null; 
@@ -22,21 +23,41 @@
             <form asp-action="Register" asp-controller="Account" method="post" class="login-form">
                 <h1>Get Started Now!</h1>
                 
+                @if (ViewBag.Success != null)
+                {
+                    <div class="message-container message-success">
+                        @ViewBag.Success
+                    </div>
+                }
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="message-container message-error">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <p>@error.ErrorMessage</p>
+                        }
+                    </div>
+                }
+                
                 <div class="form-group">
-                    <label for="Email">Username</label>
-                    <input type="email" id="Username" placeholder="Enter your username" name="Username" class="form-input" required />
+                    <label asp-for="Username">Username</label>
+                    <input asp-for="Username" type="text" placeholder="Enter your username" class="form-input" required />
+                    <span asp-validation-for="Username" class="validation-error"></span>
                 </div>
                 <div class="form-group">
-                    <label for="Email">Email address</label>
-                    <input type="email" id="Email" placeholder="Enter your email" name="Email" class="form-input" required />
+                    <label asp-for="Email">Email address</label>
+                    <input asp-for="Email" type="email" placeholder="Enter your email" class="form-input" required />
+                    <span asp-validation-for="Email" class="validation-error"></span>
                 </div>
 
                 <div class="form-group">
                     <div class="password-header">
-                        <label for="Password">Password</label>
+                        <label asp-for="Password">Password</label>
                         <a href="#" class="forgot-password">forgot password</a>
                     </div>
-                    <input type="password" id="Password" placeholder="Name" name="Password" class="form-input" required />
+                    <input asp-for="Password" type="password" placeholder="Enter your password" class="form-input" required />
+                    <span asp-validation-for="Password" class="validation-error"></span>
                 </div>
 
                 <div class="remember-me">
