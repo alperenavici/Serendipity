@@ -1,0 +1,126 @@
+@model List<ConversationApp.Entity.Entites.User>
+
+@{
+    ViewData["Title"] = "Yeni Sohbet Başlat";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container" style="max-width: 800px; margin: 50px auto; padding: 20px;">
+    <div class="card" style="border: 1px solid #ddd; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h2 style="text-align: center; margin-bottom: 30px; color: #333;">
+            <i class="fa-solid fa-plus-circle" style="margin-right: 10px;"></i>
+            Yeni Sohbet Başlat
+        </h2>
+
+        @if (TempData["Error"] != null)
+        {
+            <div style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+                <i class="fa-solid fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                @TempData["Error"]
+            </div>
+        }
+
+        @if (TempData["Success"] != null)
+        {
+            <div style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
+                <i class="fa-solid fa-check-circle" style="margin-right: 8px;"></i>
+                @TempData["Success"]
+            </div>
+        }
+
+        <form asp-action="StartNewConversation" asp-controller="Account" method="post">
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #555;">
+                    <i class="fa-solid fa-user" style="margin-right: 8px;"></i>
+                    Kullanıcı Seçin:
+                </label>
+                <select name="targetUsername" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px;">
+                    <option value="">-- Kullanıcı seçin --</option>
+                    @foreach (var user in Model)
+                    {
+                        <option value="@user.UserName">
+                            @user.UserName (@(user.Role == 1 ? "Admin" : "Developer")) - @user.Email
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #555;">
+                    <i class="fa-solid fa-message" style="margin-right: 8px;"></i>
+                    İlk Mesajınız:
+                </label>
+                <textarea name="message" required rows="4" placeholder="Merhaba! Nasılsın?" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; resize: vertical; font-family: inherit;"></textarea>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="@Url.Action("Main", "Account")" style="background: #6c757d; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; margin-right: 15px; display: inline-block;">
+                    <i class="fa-solid fa-arrow-left" style="margin-right: 8px;"></i>
+                    Geri Dön
+                </a>
+                <button type="submit" style="background: #007bff; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">
+                    <i class="fa-solid fa-paper-plane" style="margin-right: 8px;"></i>
+                    Sohbet Başlat
+                </button>
+            </div>
+        </form>
+
+        @if (Model.Any())
+        {
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
+                <h4 style="color: #666; margin-bottom: 15px;">
+                    <i class="fa-solid fa-users" style="margin-right: 8px;"></i>
+                    Mevcut Kullanıcılar (@Model.Count)
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
+                    @foreach (var user in Model.Take(8))
+                    {
+                        <div style="display: flex; align-items: center; padding: 10px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
+                            <img src="https://i.pravatar.cc/150?u=@user.UserName" alt="@user.UserName" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 12px;">
+                            <div>
+                                <div style="font-weight: bold; color: #333;">@user.UserName</div>
+                                <small style="color: #666;">@(user.Role == 1 ? "Admin" : "Developer")</small>
+                            </div>
+                        </div>
+                    }
+                </div>
+                @if (Model.Count > 8)
+                {
+                    <p style="text-align: center; margin-top: 15px; color: #666;">
+                        <small>ve @(Model.Count - 8) kullanıcı daha...</small>
+                    </p>
+                }
+            </div>
+        }
+        else
+        {
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <i class="fa-solid fa-user-slash" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+                <p>Henüz başka kullanıcı yok.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    select:focus, textarea:focus, button:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+    
+    button:hover {
+        background: #0056b3 !important;
+        transform: translateY(-1px);
+        transition: all 0.2s;
+    }
+    
+    .card {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style> 

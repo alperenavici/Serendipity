@@ -1,157 +1,260 @@
+@model ConversationApp.Web.Models.ConversationViewModel
+
 @{
     ViewData["Title"] = "Sohbet";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ConversationApp</title>
     <link rel="stylesheet" href="~/css/main.css" />
-</head>
 
 <div class="chat-container">
 
     <aside class="chat-sidebar">
         <div class="user-profile">
-            <img src="https://i.pravatar.cc/150?u=david" alt="David Peters">
+            <img src="@Model.CurrentUser.AvatarUrl" alt="@Model.CurrentUser.UserName">
             <div class="user-info">
-                <h5>David Peters</h5>
-                <p>Senior Developer</p>
+                <h5>@Model.CurrentUser.UserName</h5>
+                <p>@Model.CurrentUser.Role</p>
             </div>
             <i class="fa-solid fa-pen-to-square edit-icon"></i>
         </div>
 
         <div class="search-bar">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Search Here...">
-            <button class="refresh-button" title="Refresh Conversations">
-                <i class="fa-solid fa-arrows-rotate"></i>
-            </button>
+            <form asp-action="SearchConversations" asp-controller="Account" method="get" style="display: flex; align-items: center; width: 100%;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" name="query" placeholder="Search conversations..." style="flex: 1; border: none; outline: none; background: transparent;" value="@ViewBag.SearchQuery">
+                <a href="@Url.Action("StartNewConversation", "Account")" class="refresh-button" title="Start New Conversation">
+                    <i class="fa-solid fa-plus"></i>
+                </a>
+            </form>
         </div>
 
         <ul class="conversation-list">
-            <li class="conversation-list-item active">
-                <img src="https://i.pravatar.cc/150?u=lisa" alt="Lisa Roy">
-                <div class="conversation-details">
-                    <div class="conversation-header">
-                        <span class="name">Lisa Roy</span>
-                        <span class="time">10:35 AM</span>
+            @if (Model.ConversationList != null && Model.ConversationList.Any())
+            {
+                @foreach (var conversation in Model.ConversationList)
+                {
+                    <li class="conversation-list-item @(conversation.IsActive ? "active" : "")" data-conversation-id="@conversation.Id">
+                        <a href="@Url.Action("Main", "Account", new { conversationId = conversation.Id })" style="display: flex; text-decoration: none; color: inherit;">
+                            <img src="@conversation.AvatarUrl" alt="@conversation.Name">
+                            <div class="conversation-details">
+                                <div class="conversation-header">
+                                    <span class="name">@conversation.Name</span>
+                                    <span class="time">@conversation.LastMessageTime</span>
+                                </div>
+                                <p class="last-message">@conversation.LastMessage</p>
+                            </div>
+                            @if (conversation.UnreadCount > 0)
+                            {
+                                <div class="unread-badge">@conversation.UnreadCount</div>
+                            }
+                        </a>
+                    </li>
+                }
+            }
+            else
+            {
+                <li class="no-conversations">
+                    <div style="text-align: center; padding: 20px; color: #666;">
+                        <i class="fa-regular fa-comment" style="font-size: 48px; margin-bottom: 10px;"></i>
+                        <p>Henüz konuşmanız yok</p>
+                        <small><a href="@Url.Action("StartNewConversation", "Account")">Yeni bir sohbet başlatın</a></small>
                     </div>
-                    <p class="last-message">Hi, are you Available Tomorrow?</p>
-                </div>
-                <div class="unread-badge">1</div>
-            </li>
-            <li class="conversation-list-item">
-                <img src="https://i.pravatar.cc/150?u=jamie" alt="Jamie Taylor">
-                <div class="conversation-details">
-                    <div class="conversation-header">
-                        <span class="name">Jamie Taylor</span>
-                        <span class="time">10:35 AM</span>
-                    </div>
-                    <p class="last-message">Nice One. Will Do it tommorow</p>
-                </div>
-                <div class="unread-badge">3</div>
-            </li>
-            <!-- Diğer sohbetler buraya eklenebilir -->
+                </li>
+            }
         </ul>
     </aside>
 
     <!-- ORTA SÜTUN: ANA SOHBET EKRANI -->
-    <main class="chat-main">
-        <header class="chat-header">
-            <img src="https://i.pravatar.cc/150?u=dianne" alt="Dianne Jhonson">
-            <span class="name">Dianne Jhonson</span>
-            <div class="actions">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <i class="fa-regular fa-heart"></i>
-                <i class="fa-regular fa-bell"></i>
-            </div>
-        </header>
+        <main class="chat-main">
+        @if (Model.ActiveChatUser != null)
+        {
+            <header class="chat-header">
+                <img src="@Model.ActiveChatUser.AvatarUrl" alt="@Model.ActiveChatUser.Name">
+                <span class="name">@Model.ActiveChatUser.Name</span>
+                <div class="actions">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <i class="fa-regular fa-heart"></i>
+                    <i class="fa-regular fa-bell"></i>
+                </div>
+            </header>
+        }
+        else
+        {
+            <header class="chat-header">
+                <div style="text-align: center; width: 100%; padding: 20px;">
+                    <span class="name">Hoş Geldiniz!</span>
+                </div>
+            </header>
+        }
 
-        <div class="message-area">
-            <div class="message incoming">
-                <img class="avatar" src="https://i.pravatar.cc/150?u=dianne" alt="Dianne">
-                <div class="message-bubble">Hi David, have you got the project report pdf?</div>
+        <div class="message-area" id="messageArea">
+                @if (Model?.Messages != null && Model.Messages.Any())
+                {
+                    foreach (var message in Model.Messages)
+                    {
+                        var cssClass = message.IsOutgoing ? "outgoing" : "incoming";
+                        <div class="message @cssClass">
+                            @if (!message.IsOutgoing)
+                            {
+                                <img class="avatar" src="https://i.pravatar.cc/150?u=@message.SenderName" alt="@message.SenderName" />
+                            }
+
+                            <div class="message-bubble">
+                                @message.Content <br />
+                                <small>@message.SentDate.ToString("dd.MM.yyyy HH:mm")</small>
+                            </div>
+
+                            @if (message.IsOutgoing)
+                            {
+                                <img class="avatar" src="https://i.pravatar.cc/150?u=@message.SenderName" alt="@message.SenderName" />
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                <p>Henüz mesaj yok. Sohbeti başlatın!</p>
+                }
             </div>
 
-            <div class="message outgoing">
-                <div class="message-bubble">NO, I did not get it</div>
-                <img class="avatar" src="https://i.pravatar.cc/150?u=david" alt="David">
-            </div>
-            
-            <div class="date-separator">Yesterday</div>
-
-            <div class="message incoming">
-                <img class="avatar" src="https://i.pravatar.cc/150?u=dianne" alt="Dianne">
-                <div class="message-bubble">Ok, I will just sent it here. Plz be sure to fill the details by today end of the day.</div>
-            </div>
-
-             <!-- Diğer mesajlar buraya eklenebilir -->
-
-        </div>
-
-        <footer class="chat-composer">
-            <div class="composer-actions">
-                <i class="fa-solid fa-microphone"></i>
-            </div>
-            <input type="text" placeholder="Write Something...">
-            <div class="composer-actions">
-                <i class="fa-solid fa-paperclip"></i>
-                <i class="fa-solid fa-camera"></i>
-                <i class="fa-regular fa-face-smile"></i>
-            </div>
-            <button class="send-button">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
-        </footer>
-    </main>
+            @if (Model.ActiveChatUser != null)
+            {
+                <footer class="chat-composer">
+                    <form asp-action="SendMessage" asp-controller="Account" method="post" style="display: flex; align-items: center; width: 100%;">
+                        <input type="hidden" name="conversationId" value="@ViewBag.ActiveConversationId">
+                        <div class="composer-actions">
+                            <i class="fa-solid fa-microphone"></i>
+                        </div>
+                        <input type="text" name="message" id="messageInput" placeholder="Write Something..." required>
+                        <div class="composer-actions">
+                            <i class="fa-solid fa-paperclip"></i>
+                            <i class="fa-solid fa-camera"></i>
+                            <i class="fa-regular fa-face-smile"></i>
+                        </div>
+                        <button type="submit" class="send-button" id="sendButton">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </footer>
+            }
+        </main>
 
     <!-- SAĞ SÜTUN: KULLANICI BİLGİ PANELİ -->
     <aside class="chat-info-panel">
-        <img src="https://i.pravatar.cc/150?u=dianne" alt="Dianne Jhonson" class="profile-pic">
-        <h5 class="name">Dianne Jhonson</h5>
-        <p class="title">Junior Developer</p>
+        @if (Model.ActiveChatUser != null)
+        {
+            <img src="@Model.ActiveChatUser.AvatarUrl" alt="@Model.ActiveChatUser.Name" class="profile-pic">
+            <h5 class="name">@Model.ActiveChatUser.Name</h5>
+            <p class="title">@Model.ActiveChatUser.Role</p>
 
-        <div class="action-links">
-            <a href="#"><i class="fa-solid fa-user-group"></i> View Friends</a>
-            <a href="#"><i class="fa-regular fa-heart"></i> Add to Favorites</a>
-        </div>
-
-        <div class="attachments-section">
-            <h6>Attachments</h6>
-            <div class="attachment-grid">
-                <div class="attachment-item"> <i class="fa-solid fa-file-pdf"></i> <p>PDF</p> </div>
-                <div class="attachment-item"> <i class="fa-solid fa-film"></i> <p>VIDEO</p> </div>
-                <div class="attachment-item"> <i class="fa-solid fa-music"></i> <p>MP3</p> </div>
-                <div class="attachment-item"> <i class="fa-solid fa-image"></i> <p>IMAGE</p> </div>
+            <div class="action-links">
+                <a href="#"><i class="fa-solid fa-user-group"></i> View Friends</a>
+                <a href="#"><i class="fa-regular fa-heart"></i> Add to Favorites</a>
             </div>
-            <button class="btn-view-all">View All</button>
-        </div>
+
+            <div class="attachments-section">
+                <h6>Attachments</h6>
+                <div class="attachment-grid">
+                    <div class="attachment-item"> <i class="fa-solid fa-file-pdf"></i> <p>PDF</p> </div>
+                    <div class="attachment-item"> <i class="fa-solid fa-film"></i> <p>VIDEO</p> </div>
+                    <div class="attachment-item"> <i class="fa-solid fa-music"></i> <p>MP3</p> </div>
+                    <div class="attachment-item"> <i class="fa-solid fa-image"></i> <p>IMAGE</p> </div>
+                </div>
+                <button class="btn-view-all">View All</button>
+            </div>
+        }
+        else
+        {
+            <div style="text-align: center; padding: 40px 20px; color: #666;">
+                <i class="fa-regular fa-user" style="font-size: 48px; margin-bottom: 15px;"></i>
+                <h5>Konuşma Seçin</h5>
+                <p>Detayları görmek için sol taraftan bir konuşma seçin.</p>
+            </div>
+        }
     </aside>
 
 </div>
 
 @section Scripts {
+    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const conversationItems = document.querySelectorAll('.conversation-list-item');
+        let connection;
+        let currentConversationId = '@ViewBag.ActiveConversationId';
 
-            conversationItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    // Önce mevcut aktif olanı bul ve 'active' sınıfını kaldır
-                    const currentActive = document.querySelector('.conversation-list-item.active');
-                    if (currentActive) {
-                        currentActive.classList.remove('active');
-                    }
-                    // Tıklanan öğeye 'active' sınıfını ekle
-                    this.classList.add('active');
+        // SignalR bağlantısını başlat
+        function initializeSignalR() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chatHub")
+                .build();
 
-                    // Buraya, tıklanan sohbete ait mesajları getirecek API çağrısı eklenecek.
-                });
+            connection.start().then(function () {
+                console.log("SignalR Connected");
+                if (currentConversationId) {
+                    connection.invoke("JoinConversation", currentConversationId);
+                }
+            }).catch(function (err) {
+                console.error(err.toString());
             });
+
+            // Mesaj alma
+            connection.on("ReceiveMessage", function (message) {
+                addMessageToChat(message);
+            });
+
+            // Yeni konuşma başlatıldığında
+            connection.on("NewConversationStarted", function (data) {
+                location.reload(); // Sayfa yenile
+            });
+        }
+
+        // Chat'e mesaj ekle
+        function addMessageToChat(message) {
+            const messageArea = document.getElementById('messageArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.isOutgoing ? 'outgoing' : 'incoming'}`;
+            
+            messageDiv.innerHTML = `
+                ${!message.isOutgoing ? `<img class="avatar" src="https://i.pravatar.cc/150?u=${message.senderName}" alt="${message.senderName}" />` : ''}
+                <div class="message-bubble">
+                    ${message.content} <br />
+                    <small>${message.sentDate}</small>
+                </div>
+                ${message.isOutgoing ? `<img class="avatar" src="https://i.pravatar.cc/150?u=${message.senderName}" alt="${message.senderName}" />` : ''}
+            `;
+            
+            messageArea.appendChild(messageDiv);
+            messageArea.scrollTop = messageArea.scrollHeight;
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // SignalR'ı başlat
+            initializeSignalR();
+
+            // Enter tuşu ile mesaj gönder
+            const messageInput = document.getElementById('messageInput');
+            if (messageInput) {
+                messageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById('sendButton').click();
+                    }
+                });
+            }
+
+            // Arama formu otomatik submit
+            const searchInput = document.querySelector('input[name="query"]');
+            if (searchInput) {
+                let searchTimeout;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        if (this.value.length >= 2 || this.value.length === 0) {
+                            this.form.submit();
+                        }
+                    }, 500);
+                });
+            }
         });
     </script>
 }

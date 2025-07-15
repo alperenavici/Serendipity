@@ -24,6 +24,13 @@
                 <h1>Welcome back!</h1>
                 <p class="subtitle">Enter your Credentials to access your account</p>
 
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="message-container message-success">
+                        @TempData["SuccessMessage"]
+                    </div>
+                }
+
                 @if (ViewBag.Error != null)
                 {
                     <div class="message-container message-error">
@@ -57,11 +64,11 @@
                 </div>
 
                 <div class="remember-me">
-                    <input asp-for="RememberMe" type="checkbox" checked />
-                    <label asp-for="RememberMe">Remember me</label>
+                    <input type="checkbox" id="RememberMe" name="RememberMe" />
+                    <label for="RememberMe">Remember for 30 days</label>
                 </div>
                 
-                <button type="submit" class="btn-login">Login</button>
+                <button type="submit" class="btn-login">Sign in</button>
                 
                 <div class="social-login">
                     <button type="button" class="btn-social">
@@ -73,7 +80,7 @@
                 </div>
 
                 <div class="signup-link">
-                    Don't have an account? <a asp-action="Register" asp-controller="Account">Sign Up</a>
+                    Don't have an account? <a asp-action="Register" asp-controller="Account">Sign up for free</a>
                 </div>
 
             </form>
