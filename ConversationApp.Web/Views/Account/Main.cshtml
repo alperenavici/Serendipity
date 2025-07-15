@@ -1,4 +1,4 @@
-@model ConversationApp.Web.Models.ConversationViewModel
+@model Conversation.Core.DTOs.ConversationViewModel
 
 @{
     ViewData["Title"] = "Sohbet";
@@ -140,7 +140,6 @@
             }
         </main>
 
-    <!-- SAĞ SÜTUN: KULLANICI BİLGİ PANELİ -->
     <aside class="chat-info-panel">
         @if (Model.ActiveChatUser != null)
         {
@@ -182,7 +181,6 @@
         let connection;
         let currentConversationId = '@ViewBag.ActiveConversationId';
 
-        // SignalR bağlantısını başlat
         function initializeSignalR() {
             connection = new signalR.HubConnectionBuilder()
                 .withUrl("/chatHub")
@@ -197,18 +195,14 @@
                 console.error(err.toString());
             });
 
-            // Mesaj alma
             connection.on("ReceiveMessage", function (message) {
                 addMessageToChat(message);
             });
 
-            // Yeni konuşma başlatıldığında
             connection.on("NewConversationStarted", function (data) {
-                location.reload(); // Sayfa yenile
-            });
+                location.reload(); 
         }
 
-        // Chat'e mesaj ekle
         function addMessageToChat(message) {
             const messageArea = document.getElementById('messageArea');
             const messageDiv = document.createElement('div');
@@ -228,10 +222,8 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            // SignalR'ı başlat
             initializeSignalR();
 
-            // Enter tuşu ile mesaj gönder
             const messageInput = document.getElementById('messageInput');
             if (messageInput) {
                 messageInput.addEventListener('keypress', function(e) {
@@ -242,7 +234,6 @@
                 });
             }
 
-            // Arama formu otomatik submit
             const searchInput = document.querySelector('input[name="query"]');
             if (searchInput) {
                 let searchTimeout;

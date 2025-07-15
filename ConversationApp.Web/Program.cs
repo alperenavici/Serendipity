@@ -4,6 +4,10 @@ using ConversationApp.Data.Context;
 using ConversationApp.Entity.Entites;
 using ConversationApp.Web.Hubs;
 using Microsoft.AspNetCore.Identity;
+using ConversationApp.Data.Interfaces;
+using ConversationApp.Data.Repositories;
+using ConversationApp.Service.Interfaces;
+using ConversationApp.Service.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +23,23 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<User, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+// Register Unit of Work
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Register Repositories
+builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IConversationParticipantRepository, ConversationParticipantRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IMessageReadReceiptRepository, MessageReadReceiptRepository>();
+builder.Services.AddScoped<IScheduleMessageRepository, ScheduleMessageRepository>();
+
+// Register Services
+builder.Services.AddScoped<IConversationService, ConversationService>();
+builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IScheduleMessageService, ScheduleMessageService>();
 
 var app = builder.Build();
 

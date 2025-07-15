@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ConversationApp.Data\ConversationApp.Data.csproj" />
+    <ProjectReference Include="..\ConversationApp.Entity\ConversationApp.Entity.csproj" />
+    <ProjectReference Include="..\Conversation.Core\Conversation.Core.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,23 +1,27 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using ConversationApp.Entity.Entites;
-using ConversationApp.Data.Context;
+using ConversationApp.Service.Interfaces;
 using System;
 using System.Threading.Tasks;
-using System.Linq;
+
 
 namespace ConversationApp.Web.Hubs
 {
     public class ChatHub : Hub
     {
-        private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly IConversationService _conversationService;
+        private readonly IMessageService _messageService;
 
-        public ChatHub(ApplicationDbContext context, UserManager<User> userManager)
+        public ChatHub(
+            UserManager<User> userManager,
+            IConversationService conversationService,
+            IMessageService messageService)
         {
-            _context = context;
             _userManager = userManager;
+            _conversationService = conversationService;
+            _messageService = messageService;
         }
 
         public override async Task OnConnectedAsync()
@@ -55,20 +59,19 @@ namespace ConversationApp.Web.Hubs
             var user = await _userManager.GetUserAsync(Context.User);
             if (user != null)
             {
-                // Veritabanına kaydet
-                var newMessage = new Message
+                var conversationGuid = Guid.Parse(conversationId);
+                
+                // Check if user is participant
+                var isParticipant = await _conversationService.IsUserParticipantAsync(conversationGuid, user.Id);
+                if (!isParticipant)
                 {
-                    Id = Guid.NewGuid(),
-                    ConversationId = Guid.Parse(conversationId),
-                    UserId = user.Id,
-                    Content = message,
-                    SentDate = DateTime.UtcNow
-                };
+                    return;
+                }
 
-                _context.Messages.Add(newMessage);
-                await _context.SaveChangesAsync();
+                // Send message through service
+                var newMessage = await _messageService.SendMessageAsync(conversationGuid, user.Id, message);
 
-                // Tüm grup üyelerine gönder
+                // Notify all group members
                 await Clients.Group($"conversation_{conversationId}").SendAsync("ReceiveMessage", new
                 {
                     senderName = user.UserName,
@@ -82,72 +85,19 @@ namespace ConversationApp.Web.Hubs
         public async Task StartPrivateConversation(string targetUsername, string message)
         {
             var currentUser = await _userManager.GetUserAsync(Context.User);
-            var targetUser = await _userManager.FindByNameAsync(targetUsername);
+            if (currentUser == null) return;
 
-            if (currentUser != null && targetUser != null)
+            try
             {
-                // Mevcut konuşma var mı kontrol et
-                var existingConversation = await _context.ConversationParticipants
-                    .Include(cp => cp.Conversation)
-                        .ThenInclude(c => c.Participants)
-                    .Where(cp => cp.UserId == currentUser.Id)
-                    .Select(cp => cp.Conversation)
-                    .Where(c => c.Type == 0 && // Private conversation
-                                c.Participants.Count == 2 &&
-                                c.Participants.Any(p => p.UserId == targetUser.Id))
-                    .FirstOrDefaultAsync();
+                // Find target user through service layer (you'd need to add this to UserService)
+                // For now, we'll use UserManager but this should ideally go through service
+                var targetUser = await _userManager.FindByNameAsync(targetUsername);
+                if (targetUser == null) return;
 
-                ConversationApp.Entity.Entites.Conversation conversation;
+                // Create conversation through service
+                var conversation = await _conversationService.CreatePrivateConversationAsync(currentUser.Id, targetUser.Id, message);
 
-                if (existingConversation == null)
-                {
-                    // Yeni konuşma oluştur
-                    conversation = new ConversationApp.Entity.Entites.Conversation
-                    {
-                        Id = Guid.NewGuid(),
-                        Title = $"{currentUser.UserName} - {targetUser.UserName}",
-                        Type = 0, // Private
-                        CreationDate = DateTime.UtcNow
-                    };
-
-                    _context.Conversations.Add(conversation);
-
-                    // Katılımcıları ekle
-                    _context.ConversationParticipants.Add(new ConversationParticipant
-                    {
-                        Id = Guid.NewGuid(),
-                        ConversationId = conversation.Id,
-                        UserId = currentUser.Id,
-                        JoinedDate = DateTime.UtcNow
-                    });
-
-                    _context.ConversationParticipants.Add(new ConversationParticipant
-                    {
-                        Id = Guid.NewGuid(),
-                        ConversationId = conversation.Id,
-                        UserId = targetUser.Id,
-                        JoinedDate = DateTime.UtcNow
-                    });
-                }
-                else
-                {
-                    conversation = existingConversation;
-                }
-
-                // Mesajı kaydet
-                var newMessage = new Message
-                {
-                    Id = Guid.NewGuid(),
-                    ConversationId = conversation.Id,
-                    UserId = currentUser.Id,
-                    Content = message,
-                    SentDate = DateTime.UtcNow
-                };
-
-                _context.Messages.Add(newMessage);
-                await _context.SaveChangesAsync();
-
-                // Her iki kullanıcıya da bildir
+                // Notify both users
                 await Clients.Group($"user_{currentUser.Id}").SendAsync("NewConversationStarted", new
                 {
                     conversationId = conversation.Id.ToString(),
@@ -156,7 +106,7 @@ namespace ConversationApp.Web.Hubs
                     {
                         senderName = currentUser.UserName,
                         content = message,
-                        sentDate = newMessage.SentDate.ToString("dd.MM.yyyy HH:mm"),
+                        sentDate = DateTime.UtcNow.ToString("dd.MM.yyyy HH:mm"),
                         isOutgoing = true
                     }
                 });
@@ -169,10 +119,14 @@ namespace ConversationApp.Web.Hubs
                     {
                         senderName = currentUser.UserName,
                         content = message,
-                        sentDate = newMessage.SentDate.ToString("dd.MM.yyyy HH:mm"),
+                        sentDate = DateTime.UtcNow.ToString("dd.MM.yyyy HH:mm"),
                         isOutgoing = false
                     }
                 });
+            }
+            catch (Exception)
+            {
+                // Handle error - could send error message back to client
             }
         }
     }

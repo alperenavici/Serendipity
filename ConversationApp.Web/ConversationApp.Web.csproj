@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Conversation.Core\Conversation.Core.csproj" />
     <ProjectReference Include="..\ConversationApp.Data\ConversationApp.Data.csproj" />
+    <ProjectReference Include="..\ConversationApp.Service\ConversationApp.Service.csproj" />
   </ItemGroup>
 
   <ItemGroup>
