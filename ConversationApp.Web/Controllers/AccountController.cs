@@ -233,17 +233,17 @@ namespace ConversationApp.Web.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous] // Herkesin erişebilmesi için
+        [AllowAnonymous]
         public async Task<IActionResult> GetActiveUsersCount()
         {
             try
             {
                 var count = await _userService.GetActiveUsersCountAsync();
-                return Ok(count); // Sayıyı direkt döndür
+                return Ok(count); 
             }
             catch (Exception)
             {
-                return Ok(0); // Hata olursa 0 döndür
+                return Ok(0); 
             }
         }
 
