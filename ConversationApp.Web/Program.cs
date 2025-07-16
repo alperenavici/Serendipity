@@ -14,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
+builder.Services.AddMemoryCache();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -55,6 +56,28 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.Use(async (context, next) =>
+{
+    // Önce isteðin normal þekilde iþlenmesine izin ver
+    await next.Invoke();
+
+    if (context.User.Identity != null && context.User.Identity.IsAuthenticated)
+    {
+        var unitOfWork = context.RequestServices.GetRequiredService<ConversationApp.Data.Interfaces.IUnitOfWork>();
+
+        var userIdClaim = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
+        {
+            var user = await unitOfWork.Users.GetByIdAsync(userId);
+            if (user != null)
+            {
+                user.LastActiveDate = DateTime.UtcNow;
+                await unitOfWork.CommitAsync(); 
+            }
+        }
+    }
+});
+
 
 app.UseAuthentication();
 app.UseAuthorization();

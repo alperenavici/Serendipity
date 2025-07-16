@@ -232,6 +232,103 @@ namespace ConversationApp.Web.Controllers
             return RedirectToAction("Main", new { conversationId = conversation.Id });
         }
 
+        [HttpGet]
+        [AllowAnonymous] // Herkesin erişebilmesi için
+        public async Task<IActionResult> GetActiveUsersCount()
+        {
+            try
+            {
+                var count = await _userService.GetActiveUsersCountAsync();
+                return Ok(count); // Sayıyı direkt döndür
+            }
+            catch (Exception)
+            {
+                return Ok(0); // Hata olursa 0 döndür
+            }
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetDashboardStats()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null || (user.Role != 1 && user.Role != 2))
+                {
+                    return Json(new { error = "Yetkisiz erişim" });
+                }
+
+                var totalUsers = await _userService.GetTotalUsersCountAsync();
+                var newUsers = await _userService.GetNewUsersCountAsync(30);
+                
+                var userGrowth = await _userService.GetUserGrowthPercentageAsync(30);
+
+                return Json(new
+                {
+                    totalUsers = totalUsers,
+                    newUsers = newUsers,
+                    userGrowth = Math.Round(userGrowth, 2)
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = "İstatistikler yüklenirken hata oluştu: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserChartData()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null || (user.Role != 1 && user.Role != 2))
+                {
+                    return Json(new { error = "Yetkisiz erişim" });
+                }
+
+                var monthlyData = await _userService.GetMonthlyUserRegistrationsAsync();
+                var labels = new[] { "Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara" };
+
+                return Json(new
+                {
+                    labels = labels,
+                    data = monthlyData
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = "Kullanıcı grafiği yüklenirken hata oluştu: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMessageTrafficData()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null || (user.Role != 1 && user.Role != 2))
+                {
+                    return Json(new { error = "Yetkisiz erişim" });
+                }
+
+                var monthlyMessageData = await _messageService.GetMonthlyMessageCountsAsync();
+                var labels = new[] { "Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara" };
+
+                return Json(new
+                {
+                    labels = labels,
+                    data = monthlyMessageData
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = "Mesaj trafiği yüklenirken hata oluştu: " + ex.Message });
+            }
+        }
+
         
     }
 }

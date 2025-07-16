@@ -81,5 +81,27 @@ namespace ConversationApp.Service.Services
         {
             return await _unitOfWork.Messages.SearchMessagesInConversationAsync(conversationId, searchTerm);
         }
+
+        // Admin Dashboard Ýstatistikleri
+        public async Task<List<int>> GetMonthlyMessageCountsAsync()
+        {
+            return await _unitOfWork.Messages.GetMonthlyMessageCountsAsync();
+        }
+
+        public async Task<int> GetTotalMessagesCountAsync()
+        {
+            return await _unitOfWork.Messages.GetTotalMessagesCountAsync();
+        }
+
+        public async Task<double> GetMessageGrowthPercentageAsync(int days = 30)
+        {
+            var currentPeriodCount = await _unitOfWork.Messages.GetMessagesCountAsync(days);
+            var previousPeriodCount = await _unitOfWork.Messages.GetMessagesCountAsync(days * 2) - currentPeriodCount;
+
+            if (previousPeriodCount == 0)
+                return currentPeriodCount > 0 ? 100 : 0;
+
+            return ((double)(currentPeriodCount - previousPeriodCount) / previousPeriodCount) * 100;
+        }
     }
 } 

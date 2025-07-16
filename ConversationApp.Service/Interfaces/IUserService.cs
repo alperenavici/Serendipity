@@ -14,5 +14,12 @@ namespace ConversationApp.Service.Interfaces
         Task<bool> IsEmailExistsAsync(string email);
         Task<bool> IsUsernameExistsAsync(string username);
         Task<List<User>> GetUsersByRoleAsync(int role);
+
+       
+        Task<int> GetTotalUsersCountAsync();
+        Task<int> GetNewUsersCountAsync(int days = 30);
+        Task<int> GetActiveUsersCountAsync();
+        Task<List<int>> GetMonthlyUserRegistrationsAsync();
+        Task<double> GetUserGrowthPercentageAsync(int days = 30);
     }
 } 

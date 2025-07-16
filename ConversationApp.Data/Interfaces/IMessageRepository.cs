@@ -14,5 +14,11 @@ namespace ConversationApp.Data.Interfaces
         Task<List<Message>> GetUnreadMessagesAsync(Guid conversationId, Guid userId);
         Task<int> GetUnreadMessageCountAsync(Guid conversationId, Guid userId);
         Task<List<Message>> SearchMessagesInConversationAsync(Guid conversationId, string searchTerm);
+
+
+        // Admin Dashboard Ýstatistikleri
+        Task<List<int>> GetMonthlyMessageCountsAsync();
+        Task<int> GetTotalMessagesCountAsync();
+        Task<int> GetMessagesCountAsync(int days);
     }
-} 
+}

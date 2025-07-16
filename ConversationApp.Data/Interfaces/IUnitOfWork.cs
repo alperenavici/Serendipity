@@ -19,5 +19,6 @@ namespace ConversationApp.Data.Interfaces
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();
         Task RollbackTransactionAsync();
+        Task CommitAsync();
     }
 } 

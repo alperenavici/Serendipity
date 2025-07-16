@@ -80,5 +80,50 @@ namespace ConversationApp.Data.Repositories
                 .OrderBy(u => u.UserName)
                 .ToListAsync();
         }
+
+        // Admin Dashboard Ýstatistikleri
+        public async Task<int> GetTotalUsersCountAsync()
+        {
+            return await _context.Users
+                .CountAsync(u => !u.IsDeleted);
+        }
+
+        public async Task<int> GetNewUsersCountAsync(int days)
+        {
+            var startDate = DateTime.UtcNow.AddDays(-days);
+            return await _context.Users
+                .CountAsync(u => !u.IsDeleted && u.CreationDate >= startDate);
+        }
+
+        public async Task<int> GetActiveUsersCountAsync()
+        {
+            var timeThreshold = DateTime.UtcNow.AddMinutes(-5);
+
+            return await _context.Users
+                .CountAsync(u => !u.IsDeleted &&
+                                 u.LastActiveDate.HasValue &&
+                                 u.LastActiveDate.Value > timeThreshold);
+        }
+
+        public async Task<List<int>> GetMonthlyUserRegistrationsAsync()
+        {
+            var currentYear = DateTime.UtcNow.Year;
+            var monthlyRegistrations = new List<int>();
+
+            for (int month = 1; month <= 12; month++)
+            {
+                var startDate = new DateTime(currentYear, month, 1);
+                var endDate = startDate.AddMonths(1);
+
+                var count = await _context.Users
+                    .CountAsync(u => !u.IsDeleted &&
+                               u.CreationDate >= startDate &&
+                               u.CreationDate < endDate);
+
+                monthlyRegistrations.Add(count);
+            }
+
+            return monthlyRegistrations;
+        }
     }
 } 

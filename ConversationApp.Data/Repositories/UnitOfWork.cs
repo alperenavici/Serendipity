@@ -94,6 +94,11 @@ namespace ConversationApp.Data.Repositories
             }
         }
 
+        public async Task CommitAsync()
+        {
+          await _context.SaveChangesAsync();
+        }
+
         public void Dispose()
         {
             _transaction?.Dispose();

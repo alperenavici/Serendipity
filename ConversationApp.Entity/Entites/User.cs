@@ -11,6 +11,7 @@ namespace ConversationApp.Entity.Entites
         public bool IsBanned { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime? DeletedOn { get; set; }
+        public DateTime? LastActiveDate { get; set; }
 
         public virtual ICollection<ConversationParticipant> ConversationParticipants { get; set; }
         public virtual ICollection<Message> SentMessages { get; set; }

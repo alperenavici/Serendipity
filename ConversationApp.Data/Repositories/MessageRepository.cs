@@ -84,5 +84,37 @@ namespace ConversationApp.Data.Repositories
                 .OrderBy(m => m.SentDate)
                 .ToListAsync();
         }
+        public async Task<List<int>> GetMonthlyMessageCountsAsync()
+        {
+            var currentYear = DateTime.UtcNow.Year;
+            var monthlyMessages = new List<int>();
+
+            for (int month = 1; month <= 12; month++)
+            {
+                var startDate = new DateTime(currentYear, month, 1);
+                var endDate = startDate.AddMonths(1);
+
+                var count = await _context.Messages
+                    .CountAsync(m => m.SentDate >= startDate &&
+                               m.SentDate < endDate);
+
+                monthlyMessages.Add(count);
+            }
+
+            return monthlyMessages;
+        }
+
+        public async Task<int> GetTotalMessagesCountAsync()
+        {
+            return await _context.Messages.CountAsync();
+        }
+
+        public async Task<int> GetMessagesCountAsync(int days)
+        {
+            var startDate = DateTime.UtcNow.AddDays(-days);
+            return await _context.Messages
+                .CountAsync(m => m.SentDate >= startDate);
+        }
+
     }
 } 

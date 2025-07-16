@@ -48,10 +48,10 @@
                 </div>
                 <div class="stat-card dark">
                     <div class="card-header">
-                        <span>Active Users</span> <i class="fa-solid fa-arrow-trend-up"></i>
+                        <span>Online Now</span> <i class="fa-solid fa-arrow-trend-up"></i>
                     </div>
-                    <div class="stat-value">2,318</div>
-                    <div class="stat-change positive">+6.08%</div>
+                    <div class="stat-value" id="online-user-counter">0</div>
+                    <div class="stat-change positive" real-time></div>
                 </div>
             </div>
 
@@ -94,77 +94,144 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+      
         document.addEventListener("DOMContentLoaded", function () {
-            
-            const usersChartCtx = document.getElementById('usersChart').getContext('2d');
-            
-            const usersChartGradient = usersChartCtx.createLinearGradient(0, 0, 0, 300);
-            usersChartGradient.addColorStop(0, 'rgba(74, 105, 255, 0.2)');
-            usersChartGradient.addColorStop(1, 'rgba(74, 105, 255, 0)');
 
-            new Chart(usersChartCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    datasets: [{
-                        label: 'Users',
-                        data: [1800, 1600, 1900, 2500, 2300, 2600], // Bu verileri API'den alacaksınız
-                        borderColor: '#8A3FFC', // Mor çizgi rengi
-                        backgroundColor: usersChartGradient,
-                        fill: true,
-                        tension: 0.4, // Çizgiyi yumuşatır
-                        pointBackgroundColor: '#FFFFFF',
-                        pointBorderColor: '#8A3FFC',
-                        pointBorderWidth: 2,
-                        pointRadius: 5
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: false, grid: { drawBorder: false } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
+            loadDashboardStats();
 
-            // --- MESAJ TRAFİĞİ GRAFİĞİ (MESSAGE TRAFFIC CHART) ---
-            const messageTrafficCtx = document.getElementById('messageTrafficChart').getContext('2d');
-            new Chart(messageTrafficCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [
-                        {
-                            label: 'Dashboard',
-                            data: [120, 190, 130, 150, 120, 130, 140, 160, 150, 170, 180, 200],
-                            backgroundColor: '#F56565', // Kırmızı
-                            borderRadius: 4,
-                            borderSkipped: false,
-                        },
-                        {
-                            label: 'SnowUI',
-                            data: [200, 220, 210, 230, 240, 250, 260, 250, 270, 280, 290, 300],
-                            backgroundColor: '#4A5568', // Koyu Gri
-                            borderRadius: 4,
-                            borderSkipped: false,
+            loadUserChart();
+            loadMessageTrafficChart();
+            fetchOnlineUsers();
+            setInterval(loadOnlineUserCount,10000);
+            function fetchOnlineUsers() {
+                fetch('/Account/GetActiveUsersCount') 
+                    .then(response => response.json())
+                    .then(count => {
+                        
+                        document.getElementById('online-user-counter').textContent = count;
+                    })
+                    .catch(error => {
+                        console.error('Online kullanıcı sayısı yüklenirken hata:', error);
+                        document.getElementById('online-user-counter').textContent = '0';
+                    });
+            }
+
+            function loadDashboardStats() {
+                fetch('/Account/GetDashboardStats')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error('İstatistik hatası:', data.error);
+                            return;
                         }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'top', align: 'start' } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { drawBorder: false } },
-                        x: { stacked: true, grid: { display: false } }
-                    },
-                    barPercentage: 0.5,
-                    categoryPercentage: 0.5
-                }
-            });
+
+                        // İstatistik kartlarını güncelle
+                        document.querySelector('.stat-card:nth-child(1) .stat-value').textContent = data.totalUsers.toLocaleString();
+                        document.querySelector('.stat-card:nth-child(2) .stat-value').textContent = data.newUsers.toLocaleString();
+                        document.querySelector('.stat-card:nth-child(3) .stat-value').textContent = data.activeUsers.toLocaleString();
+
+                        // Büyüme yüzdesini güncelle
+                        const growthElement = document.querySelector('.stat-card:nth-child(2) .stat-change');
+                        growthElement.textContent = `${data.userGrowth >= 0 ? '+' : ''}${data.userGrowth}%`;
+                        growthElement.className = `stat-change ${data.userGrowth >= 0 ? 'positive' : 'negative'}`;
+                    })
+                    .catch(error => {
+                        console.error('İstatistikler yüklenirken hata:', error);
+                    });
+            }
+
+            // Kullanıcı grafiğini yükle
+            function loadUserChart() {
+                fetch('/Account/GetUserChartData')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error('Kullanıcı grafiği hatası:', data.error);
+                            return;
+                        }
+
+                        const usersChartCtx = document.getElementById('usersChart').getContext('2d');
+
+                        // Degrade arkaplan rengi oluşturma
+                        const usersChartGradient = usersChartCtx.createLinearGradient(0, 0, 0, 300);
+                        usersChartGradient.addColorStop(0, 'rgba(74, 105, 255, 0.2)');
+                        usersChartGradient.addColorStop(1, 'rgba(74, 105, 255, 0)');
+
+                        new Chart(usersChartCtx, {
+                            type: 'line',
+                            data: {
+                                labels: data.labels,
+                                datasets: [{
+                                    label: 'Users',
+                                    data: data.data,
+                                    borderColor: '#8A3FFC',
+                                    backgroundColor: usersChartGradient,
+                                    fill: true,
+                                    tension: 0.4,
+                                    pointBackgroundColor: '#FFFFFF',
+                                    pointBorderColor: '#8A3FFC',
+                                    pointBorderWidth: 2,
+                                    pointRadius: 5
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    y: { beginAtZero: false, grid: { drawBorder: false } },
+                                    x: { grid: { display: false } }
+                                }
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Kullanıcı grafiği yüklenirken hata:', error);
+                    });
+            }
+
+            // Mesaj trafiği grafiğini yükle
+            function loadMessageTrafficChart() {
+                fetch('/Account/GetMessageTrafficData')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error('Mesaj trafiği hatası:', data.error);
+                            return;
+                        }
+
+                        const messageTrafficCtx = document.getElementById('messageTrafficChart').getContext('2d');
+                        new Chart(messageTrafficCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: data.labels,
+                                datasets: [
+                                    {
+                                        label: 'Messages',
+                                        data: data.data,
+                                        backgroundColor: '#4A5568',
+                                        borderRadius: 4,
+                                        borderSkipped: false,
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { position: 'top', align: 'start' } },
+                                scales: {
+                                    y: { beginAtZero: true, grid: { drawBorder: false } },
+                                    x: { grid: { display: false } }
+                                },
+                                barPercentage: 0.5,
+                                categoryPercentage: 0.5
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Mesaj trafiği grafiği yüklenirken hata:', error);
+                    });
+            }
         });
     </script>
 }

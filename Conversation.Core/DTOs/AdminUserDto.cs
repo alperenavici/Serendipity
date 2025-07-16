@@ -14,7 +14,7 @@ namespace Conversation.Core.DTOs
         public string Email { get; set; }
         [Required]
         public string Password { get; set; }
-        public int Role { get; set; } // 0: User, 1: Admin 2:3 sUPERADMİN
+        public int Role { get; set; } // 0: User, 1: Admin 2:Superadmin
 
 
     }
