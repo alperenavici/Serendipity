@@ -186,29 +186,6 @@ namespace ConversationApp.Web.Controllers
             return RedirectToAction("Main", new { conversationId = conversation.Id });
         }
 
-        [HttpPost]
-        public async Task<IActionResult> SendMessage(Guid conversationId, string message)
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                return RedirectToAction("Main", new { conversationId = conversationId });
-            }
-
-            var isParticipant = await _conversationService.IsUserParticipantAsync(conversationId, currentUser.Id);
-            if (!isParticipant)
-            {
-                return Forbid();
-            }
-
-            await _messageService.SendMessageAsync(conversationId, currentUser.Id, message);
-
-            return RedirectToAction("Main", new { conversationId = conversationId });
-        }
+        
     }
 }

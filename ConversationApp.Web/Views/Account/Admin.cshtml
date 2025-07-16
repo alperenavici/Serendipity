@@ -94,13 +94,10 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Bu script, sayfadaki tüm grafikleri çizer.
         document.addEventListener("DOMContentLoaded", function () {
             
-            // --- KULLANICI GRAFİĞİ (USERS CHART) ---
             const usersChartCtx = document.getElementById('usersChart').getContext('2d');
             
-            // Degrade arkaplan rengi oluşturma
             const usersChartGradient = usersChartCtx.createLinearGradient(0, 0, 0, 300);
             usersChartGradient.addColorStop(0, 'rgba(74, 105, 255, 0.2)');
             usersChartGradient.addColorStop(1, 'rgba(74, 105, 255, 0)');

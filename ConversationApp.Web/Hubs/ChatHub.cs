@@ -57,29 +57,32 @@ namespace ConversationApp.Web.Hubs
         public async Task SendMessage(string conversationId, string message)
         {
             var user = await _userManager.GetUserAsync(Context.User);
-            if (user != null)
+            if (user == null) return;
+
+            if (!Guid.TryParse(conversationId, out var conversationGuid)) return;
+
+            var isParticipant = await _conversationService.IsUserParticipantAsync(conversationGuid, user.Id);
+            if (!isParticipant) return;
+
+            var newMessage = await _messageService.SendMessageAsync(conversationGuid, user.Id, message);
+
+            // Gruptaki DÝÐER kiþilere "gelen" mesaj olarak gönder
+            await Clients.OthersInGroup($"conversation_{conversationId}").SendAsync("ReceiveMessage", new
             {
-                var conversationGuid = Guid.Parse(conversationId);
-                
-                // Check if user is participant
-                var isParticipant = await _conversationService.IsUserParticipantAsync(conversationGuid, user.Id);
-                if (!isParticipant)
-                {
-                    return;
-                }
+                senderName = user.UserName,
+                content = newMessage.Content,
+                sentDate = newMessage.SentDate.ToString("dd.MM.yyyy HH:mm"),
+                isOutgoing = false
+            });
 
-                // Send message through service
-                var newMessage = await _messageService.SendMessageAsync(conversationGuid, user.Id, message);
-
-                // Notify all group members
-                await Clients.Group($"conversation_{conversationId}").SendAsync("ReceiveMessage", new
-                {
-                    senderName = user.UserName,
-                    content = message,
-                    sentDate = newMessage.SentDate.ToString("dd.MM.yyyy HH:mm"),
-                    isOutgoing = false
-                });
-            }
+            // Mesajý SADECE GÖNDEREN kiþiye "giden" mesaj olarak gönder
+            await Clients.Caller.SendAsync("ReceiveMessage", new
+            {
+                senderName = user.UserName,
+                content = newMessage.Content,
+                sentDate = newMessage.SentDate.ToString("dd.MM.yyyy HH:mm"),
+                isOutgoing = true
+            });
         }
 
         public async Task StartPrivateConversation(string targetUsername, string message)

@@ -7,6 +7,8 @@
 
     <link rel="stylesheet" href="~/css/main.css" />
 
+
+
 <div class="chat-container">
 
     <aside class="chat-sidebar">
@@ -120,23 +122,24 @@
 
             @if (Model.ActiveChatUser != null)
             {
-                <footer class="chat-composer">
-                    <form asp-action="SendMessage" asp-controller="Account" method="post" style="display: flex; align-items: center; width: 100%;">
-                        <input type="hidden" name="conversationId" value="@ViewBag.ActiveConversationId">
-                        <div class="composer-actions">
-                            <i class="fa-solid fa-microphone"></i>
-                        </div>
-                        <input type="text" name="message" id="messageInput" placeholder="Write Something..." required>
-                        <div class="composer-actions">
-                            <i class="fa-solid fa-paperclip"></i>
-                            <i class="fa-solid fa-camera"></i>
-                            <i class="fa-regular fa-face-smile"></i>
-                        </div>
-                        <button type="submit" class="send-button" id="sendButton">
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
-                    </form>
-                </footer>
+            <footer class="chat-composer">
+                <!-- Forma bir ID ekleyin ki JavaScript kolayca bulabilsin -->
+                <form id="sendMessageForm" method="post" style="display: flex; align-items: center; width: 100%;">
+                    <input type="hidden" name="conversationId" value="@ViewBag.ActiveConversationId">
+                    <div class="composer-actions">
+                        <i class="fa-solid fa-microphone"></i>
+                    </div>
+                    <input type="text" name="message" id="messageInput" placeholder="Write Something..." required>
+                    <div class="composer-actions">
+                        <i class="fa-solid fa-paperclip"></i>
+                        <i class="fa-solid fa-camera"></i>
+                        <i class="fa-regular fa-face-smile"></i>
+                    </div>
+                    <button type="submit" class="send-button" id="sendButton">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </footer>
             }
         </main>
 
@@ -174,77 +177,96 @@
     </aside>
 
 </div>
-
 @section Scripts {
-    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
-        let connection;
-        let currentConversationId = '@ViewBag.ActiveConversationId';
+        document.addEventListener("DOMContentLoaded", function () {
+            // Gerekli HTML elementlerini seç
+            const messageArea = document.getElementById('messageArea');
+            const sendMessageForm = document.getElementById('sendMessageForm');
+            const messageInput = document.getElementById('messageInput');
+            let currentConversationId = '@ViewBag.ActiveConversationId';
 
-        function initializeSignalR() {
-            connection = new signalR.HubConnectionBuilder()
+            // Sayfa ilk yüklendiğinde sohbeti en alta kaydır
+            if (messageArea) {
+                messageArea.scrollTop = messageArea.scrollHeight;
+            }
+
+            // --- SIGNALR BAĞLANTISI ---
+            const connection = new signalR.HubConnectionBuilder()
                 .withUrl("/chatHub")
                 .build();
 
-            connection.start().then(function () {
-                console.log("SignalR Connected");
-                if (currentConversationId) {
-                    connection.invoke("JoinConversation", currentConversationId);
-                }
-            }).catch(function (err) {
-                console.error(err.toString());
-            });
-
+            // Hub'dan "ReceiveMessage" olayı gelince çalışacak fonksiyon
             connection.on("ReceiveMessage", function (message) {
                 addMessageToChat(message);
             });
 
+            // Hub'dan "NewConversationStarted" olayı gelince çalışacak fonksiyon
             connection.on("NewConversationStarted", function (data) {
-                location.reload(); 
-        }
+                location.reload(); // Yeni sohbet başladığında sayfayı yenile (bu doğru)
+            });
 
-        function addMessageToChat(message) {
-            const messageArea = document.getElementById('messageArea');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${message.isOutgoing ? 'outgoing' : 'incoming'}`;
-            
-            messageDiv.innerHTML = `
-                ${!message.isOutgoing ? `<img class="avatar" src="https://i.pravatar.cc/150?u=${message.senderName}" alt="${message.senderName}" />` : ''}
-                <div class="message-bubble">
-                    ${message.content} <br />
-                    <small>${message.sentDate}</small>
-                </div>
-                ${message.isOutgoing ? `<img class="avatar" src="https://i.pravatar.cc/150?u=${message.senderName}" alt="${message.senderName}" />` : ''}
-            `;
-            
-            messageArea.appendChild(messageDiv);
-            messageArea.scrollTop = messageArea.scrollHeight;
-        }
+            // Bağlantıyı başlat
+            connection.start().then(function () {
+                console.log("SignalR Connected");
+                // Eğer aktif bir sohbet varsa, Hub'daki gruba katıl
+                if (currentConversationId) {
+                    connection.invoke("JoinConversation", currentConversationId)
+                              .catch(err => console.error('JoinConversation error: ', err.toString()));
+                }
+            }).catch(function (err) {
+                console.error('SignalR connection error: ', err.toString());
+            });
 
-        document.addEventListener("DOMContentLoaded", function() {
-            initializeSignalR();
 
-            const messageInput = document.getElementById('messageInput');
-            if (messageInput) {
-                messageInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        document.getElementById('sendButton').click();
+            // --- FORM GÖNDERME OLAYINI YAKALAMA (EN KRİTİK KISIM) ---
+            if (sendMessageForm) {
+                sendMessageForm.addEventListener("submit", function (event) {
+                    // Bu satır, formun controller'a gidip sayfayı yenilemesini ENGELLER.
+                    event.preventDefault();
+
+                    const message = messageInput.value.trim();
+                    // Mesaj boş değilse ve sohbet ID'si varsa Hub'a gönder
+                    if (message && currentConversationId) {
+                        connection.invoke("SendMessage", currentConversationId, message)
+                                  .catch(err => console.error('SendMessage error: ', err.toString()));
+
+                        messageInput.value = ""; // Mesaj kutusunu temizle
+                        messageInput.focus(); // Tekrar mesaj yazmak için odaklan
                     }
                 });
             }
 
-            const searchInput = document.querySelector('input[name="query"]');
-            if (searchInput) {
-                let searchTimeout;
-                searchInput.addEventListener('input', function() {
-                    clearTimeout(searchTimeout);
-                    searchTimeout = setTimeout(() => {
-                        if (this.value.length >= 2 || this.value.length === 0) {
-                            this.form.submit();
-                        }
-                    }, 500);
-                });
+            // --- ANLIK MESAJI EKRANA EKLEYEN FONKSİYON ---
+            function addMessageToChat(message) {
+                // Eğer mesaj alanı yoksa (örneğin hiç sohbet seçilmemişse) bir şey yapma
+                if (!messageArea) return;
+
+                // Mesajı ilk gördüğünüzde "Henüz mesaj yok" yazısını kaldır
+                const noMessageInfo = messageArea.querySelector('p');
+                if (noMessageInfo && noMessageInfo.innerText.includes('Henüz mesaj yok')) {
+                    noMessageInfo.remove();
+                }
+
+                const messageDiv = document.createElement('div');
+                // Hub'dan gelen "isOutgoing" değerine göre "outgoing" veya "incoming" sınıfını ata
+                const cssClass = message.isOutgoing ? "outgoing" : "incoming";
+                messageDiv.className = `message ${cssClass}`;
+
+                // Avatarı ve mesaj balonunu oluştur
+                messageDiv.innerHTML = `
+                    ${!message.isOutgoing ? `<img class="avatar" src="https://i.pravatar.cc/150?u=${message.senderName}" alt="${message.senderName}" />` : ''}
+                    <div class="message-bubble">
+                        ${message.content} <br />
+                        <small>${message.sentDate}</small>
+                    </div>
+                    ${message.isOutgoing ? `<img class="avatar" src="https://i.pravatar.cc/150?u=${message.senderName}" alt="${message.senderName}" />` : ''}
+                `;
+
+                messageArea.appendChild(messageDiv);
+                // Yeni mesaj gelince sohbet alanını en alta kaydır
+                messageArea.scrollTop = messageArea.scrollHeight;
             }
         });
     </script>
