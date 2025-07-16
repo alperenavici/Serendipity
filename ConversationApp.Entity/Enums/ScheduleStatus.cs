@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace ConversationApp.Entity.Enums
 {
-    internal class ScheduleStatus
+    public enum ScheduleStatus
     {
+        Pending= 0,
+        Active = 1,
+        Completed = 2,
+        Paused = 3,
+        Failed = 4
     }
 }

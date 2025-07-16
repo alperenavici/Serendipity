@@ -17,7 +17,7 @@ namespace ConversationApp.Entity.Entites
         public virtual ICollection<Message> SentMessages { get; set; }
         public virtual ICollection<MessageReadReceipt> ReadReceipts { get; set; }
         public virtual ICollection<ScheduleMessage> CreatedScheduledMessages { get; set; }
-        public virtual ICollection<ScheduleMessage> TargetedScheduledMessages { get; set; }
+        public virtual ICollection<ScheduleMessageTarget> TargetedScheduledMessages { get; set; }
 
         public User()
         {
@@ -25,7 +25,7 @@ namespace ConversationApp.Entity.Entites
             SentMessages = new HashSet<Message>();
             ReadReceipts = new HashSet<MessageReadReceipt>();
             CreatedScheduledMessages = new HashSet<ScheduleMessage>();
-            TargetedScheduledMessages = new HashSet<ScheduleMessage>();
+            TargetedScheduledMessages = new HashSet<ScheduleMessageTarget>();
         }
     }
 }

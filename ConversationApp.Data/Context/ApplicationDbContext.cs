@@ -21,6 +21,7 @@ namespace ConversationApp.Data.Context
         public DbSet<ConversationParticipant> ConversationParticipants { get; set; }
         public DbSet<MessageReadReceipt> MessageReadReceipts { get; set; }
         public DbSet<ScheduleMessage> ScheduleMessages { get; set; }
+        public DbSet<ScheduleMessageTarget> ScheduleMessageTargets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -92,23 +93,39 @@ namespace ConversationApp.Data.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
+           
             modelBuilder.Entity<ScheduleMessage>(entity =>
             {
                 entity.HasKey(sm => sm.Id);
-                entity.Property(sm => sm.MessageText).IsRequired();
-                entity.Property(sm => sm.ScheduledTime).IsRequired();
-                entity.Property(sm => sm.ScheduledSentTime).IsRequired();
-                entity.Property(sm => sm.CreationDate).IsRequired();
+                entity.Property(sm => sm.Title).IsRequired().HasMaxLength(200);
+                entity.Property(sm => sm.MessageContent).IsRequired();
+                entity.Property(sm => sm.CreatedOn).IsRequired();
+                entity.Property(sm => sm.NextRunTime).IsRequired();
+                entity.Property(sm => sm.Status).IsRequired();
 
-                entity.HasOne(sm => sm.TargetUser)
-                    .WithMany(u => u.TargetedScheduledMessages)
-                    .HasForeignKey(sm => sm.TargetUserId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                entity.HasOne(sm => sm.CreatedByAdmin)
+                entity.HasOne(sm => sm.CreatedByUser)
                     .WithMany(u => u.CreatedScheduledMessages)
                     .HasForeignKey(sm => sm.CreatedByUserId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(sm => sm.CreatedByUser)
+                    .WithMany(u => u.CreatedScheduledMessages)
+                    .HasForeignKey(sm => sm.CreatedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<ScheduleMessageTarget>(entity =>
+            {
+                entity.HasKey(st => new {st.SchedduleMessageId, st.TargetUserId});
+                entity.HasOne(st=>st.ScheduleMessage)
+                    .WithMany(sm => sm.Targets)
+                    .HasForeignKey(st => st.SchedduleMessageId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(st => st.TargetUser)
+                    .WithMany(u => u.TargetedScheduledMessages)
+                    .HasForeignKey(st => st.TargetUserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             base.OnModelCreating(modelBuilder);

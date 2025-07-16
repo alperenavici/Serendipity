@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace ConversationApp.Entity.Entites
 {
-    internal class ScheduleMessageTarget
+    public class ScheduleMessageTarget
     {
+        public Guid SchedduleMessageId { get; set; }
+        public Guid TargetUserId { get; set; }
+
+        public virtual ScheduleMessage ScheduleMessage { get; set; }
+        public virtual User TargetUser { get; set; }
     }
 }
