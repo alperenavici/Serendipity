@@ -11,7 +11,7 @@ namespace ConversationApp.Data.Interfaces
         IConversationParticipantRepository ConversationParticipants { get; }
         IUserRepository Users { get; }
         IMessageReadReceiptRepository MessageReadReceipts { get; }
-        IScheduleMessageRepository ScheduleMessages { get; }
+        //IScheduleMessageRepository ScheduleMessages { get; }
 
         // Transaction methods
         Task<int> SaveChangesAsync();

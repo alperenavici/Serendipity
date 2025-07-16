@@ -40,8 +40,8 @@ namespace ConversationApp.Data.Repositories
         public IMessageReadReceiptRepository MessageReadReceipts => 
             _messageReadReceipts ??= new MessageReadReceiptRepository(_context);
 
-        public IScheduleMessageRepository ScheduleMessages => 
-            _scheduleMessages ??= new ScheduleMessageRepository(_context);
+        //public IScheduleMessageRepository ScheduleMessages => 
+        //    _scheduleMessages ??= new ScheduleMessageRepository(_context);
 
         // Transaction methods
         public async Task<int> SaveChangesAsync()
