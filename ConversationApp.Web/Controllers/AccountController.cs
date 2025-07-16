@@ -1,13 +1,17 @@
 using Conversation.Core.DTo;
 using Conversation.Core.DTOs;
 using ConversationApp.Entity.Entites;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
 using ConversationApp.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
+
 
 namespace ConversationApp.Web.Controllers
 {
@@ -34,6 +38,38 @@ namespace ConversationApp.Web.Controllers
         }
 
         [HttpGet]
+        public IActionResult AdminLogin()
+        {
+            return View();
+        }
+      
+        [HttpPost]
+        public async Task<IActionResult> AdminLogin(AdminUserDto dto)
+        {
+            if (!ModelState.IsValid)
+                return View(dto);
+
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+
+            if (user != null && await _userManager.CheckPasswordAsync(user, dto.Password))
+            {
+                if (user.Role == 1 || user.Role == 2) 
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("Admin", "Account");
+                }
+                ModelState.AddModelError(string.Empty, "Yetkiniz yok.");
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Geçersiz e-posta veya şifre.");
+            }
+
+            return View(dto);
+        }
+
+
+        [HttpGet]
         public IActionResult Login()
         {
             return View();
@@ -44,6 +80,7 @@ namespace ConversationApp.Web.Controllers
         {
             return View();
         }
+        
 
         [HttpGet]
         public async Task<IActionResult> Main(Guid? conversationId, string query)
@@ -62,10 +99,19 @@ namespace ConversationApp.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult Admin()
+        public async Task<IActionResult> Admin()
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction("AdminLogin", "Account");
+
+            if (user.Role != 1 && user.Role != 2)
+                return Forbid(); 
+
             return View();
         }
+
+       
 
         [HttpPost]
         public async Task<IActionResult> Register(RegisterDto dto)

@@ -92,15 +92,11 @@ namespace ConversationApp.Web.Hubs
 
             try
             {
-                // Find target user through service layer (you'd need to add this to UserService)
-                // For now, we'll use UserManager but this should ideally go through service
                 var targetUser = await _userManager.FindByNameAsync(targetUsername);
                 if (targetUser == null) return;
 
-                // Create conversation through service
                 var conversation = await _conversationService.CreatePrivateConversationAsync(currentUser.Id, targetUser.Id, message);
 
-                // Notify both users
                 await Clients.Group($"user_{currentUser.Id}").SendAsync("NewConversationStarted", new
                 {
                     conversationId = conversation.Id.ToString(),
@@ -129,7 +125,6 @@ namespace ConversationApp.Web.Hubs
             }
             catch (Exception)
             {
-                // Handle error - could send error message back to client
             }
         }
     }

@@ -123,7 +123,6 @@
             @if (Model.ActiveChatUser != null)
             {
             <footer class="chat-composer">
-                <!-- Forma bir ID ekleyin ki JavaScript kolayca bulabilsin -->
                 <form id="sendMessageForm" method="post" style="display: flex; align-items: center; width: 100%;">
                     <input type="hidden" name="conversationId" value="@ViewBag.ActiveConversationId">
                     <div class="composer-actions">
@@ -178,39 +177,32 @@
 
 </div>
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script src="~/js/SignalIR.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Gerekli HTML elementlerini seç
             const messageArea = document.getElementById('messageArea');
             const sendMessageForm = document.getElementById('sendMessageForm');
             const messageInput = document.getElementById('messageInput');
             let currentConversationId = '@ViewBag.ActiveConversationId';
 
-            // Sayfa ilk yüklendiğinde sohbeti en alta kaydır
             if (messageArea) {
                 messageArea.scrollTop = messageArea.scrollHeight;
             }
 
-            // --- SIGNALR BAĞLANTISI ---
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl("/chatHub")
                 .build();
 
-            // Hub'dan "ReceiveMessage" olayı gelince çalışacak fonksiyon
             connection.on("ReceiveMessage", function (message) {
                 addMessageToChat(message);
             });
 
-            // Hub'dan "NewConversationStarted" olayı gelince çalışacak fonksiyon
             connection.on("NewConversationStarted", function (data) {
-                location.reload(); // Yeni sohbet başladığında sayfayı yenile (bu doğru)
+                location.reload(); 
             });
 
-            // Bağlantıyı başlat
             connection.start().then(function () {
                 console.log("SignalR Connected");
-                // Eğer aktif bir sohbet varsa, Hub'daki gruba katıl
                 if (currentConversationId) {
                     connection.invoke("JoinConversation", currentConversationId)
                               .catch(err => console.error('JoinConversation error: ', err.toString()));
@@ -220,37 +212,30 @@
             });
 
 
-            // --- FORM GÖNDERME OLAYINI YAKALAMA (EN KRİTİK KISIM) ---
             if (sendMessageForm) {
                 sendMessageForm.addEventListener("submit", function (event) {
-                    // Bu satır, formun controller'a gidip sayfayı yenilemesini ENGELLER.
                     event.preventDefault();
 
                     const message = messageInput.value.trim();
-                    // Mesaj boş değilse ve sohbet ID'si varsa Hub'a gönder
                     if (message && currentConversationId) {
                         connection.invoke("SendMessage", currentConversationId, message)
                                   .catch(err => console.error('SendMessage error: ', err.toString()));
 
-                        messageInput.value = ""; // Mesaj kutusunu temizle
-                        messageInput.focus(); // Tekrar mesaj yazmak için odaklan
+                        messageInput.value = ""; 
+                        messageInput.focus(); 
                     }
                 });
             }
 
-            // --- ANLIK MESAJI EKRANA EKLEYEN FONKSİYON ---
             function addMessageToChat(message) {
-                // Eğer mesaj alanı yoksa (örneğin hiç sohbet seçilmemişse) bir şey yapma
                 if (!messageArea) return;
 
-                // Mesajı ilk gördüğünüzde "Henüz mesaj yok" yazısını kaldır
                 const noMessageInfo = messageArea.querySelector('p');
                 if (noMessageInfo && noMessageInfo.innerText.includes('Henüz mesaj yok')) {
                     noMessageInfo.remove();
                 }
 
                 const messageDiv = document.createElement('div');
-                // Hub'dan gelen "isOutgoing" değerine göre "outgoing" veya "incoming" sınıfını ata
                 const cssClass = message.isOutgoing ? "outgoing" : "incoming";
                 messageDiv.className = `message ${cssClass}`;
 
@@ -265,7 +250,6 @@
                 `;
 
                 messageArea.appendChild(messageDiv);
-                // Yeni mesaj gelince sohbet alanını en alta kaydır
                 messageArea.scrollTop = messageArea.scrollHeight;
             }
         });

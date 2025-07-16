@@ -1,0 +1,74 @@
+﻿@model Conversation.Core.DTOs.AdminUserDto
+@{
+    ViewData["Title"] = "AdminLogin";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ConversationApp</title>
+    <link rel="stylesheet" href="~/css/login.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+    <div class="login-container">
+   
+
+        <div class="login-form-wrapper">
+            <form asp-action="AdminLogin" asp-controller="Account" method="post" class="login-form">
+                <h1>Welcome Admin!</h1>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="message-container message-success">
+                        @TempData["SuccessMessage"]
+                    </div>
+                }
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="message-container message-error">
+                        @ViewBag.Error
+                    </div>
+                }
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="message-container message-error">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <p>@error.ErrorMessage</p>
+                        }
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label asp-for="Email">Email address</label>
+                    <input asp-for="Email" type="email" placeholder="Enter your email" class="form-input" required />
+                    <span asp-validation-for="Email" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="password-header">
+                        <label asp-for="Password">Password</label>
+                      
+                    </div>
+                    <input asp-for="Password" type="password" placeholder="Enter your password" class="form-input" required />
+                    <span asp-validation-for="Password" class="validation-error"></span>
+                </div>
+
+                
+                <button type="submit" class="btn-login">Sign in</button>
+
+
+
+            </form>
+        </div>
+    </div>
+
+
+</body>
+</html>
