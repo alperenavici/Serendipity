@@ -1,0 +1,165 @@
+@model ConversationApp.Web.Models.ScheduleMessageListViewModel
+@{
+    ViewData["Title"] = "Zamanlanmış Mesajlar";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-clock-fill"></i> Zamanlanmış Mesajlar</h2>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Yeni Zamanlanmış Mesaj
+                </a>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (Model.ScheduleMessages.Any())
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Başlık</th>
+                                        <th>Mesaj</th>
+                                        <th>Sonraki Çalışma</th>
+                                        <th>Son Çalışma</th>
+                                        <th>Durum</th>
+                                        <th>Hedef Sayısı</th>
+                                        <th>Aktif</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var message in Model.ScheduleMessages)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@message.Title</strong>
+                                                <br />
+                                                <small class="text-muted">@message.CreatedOn.ToString("dd.MM.yyyy HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                <span class="text-truncate" style="max-width: 200px; display: inline-block;" title="@message.MessageContent">
+                                                    @(message.MessageContent.Length > 50 ? message.MessageContent.Substring(0, 50) + "..." : message.MessageContent)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold">@message.NextRunTime.ToString("dd.MM.yyyy HH:mm")</span>
+                                                @if (!string.IsNullOrEmpty(message.CronExpression))
+                                                {
+                                                    <br />
+                                                    <small class="text-info">
+                                                        <i class="bi bi-arrow-repeat"></i> Tekrarlanan
+                                                    </small>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (message.LastRunTime.HasValue)
+                                                {
+                                                    @message.LastRunTime.Value.ToString("dd.MM.yyyy HH:mm")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="@message.StatusCssClass">@message.StatusText</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@message.TargetCount</span>
+                                            </td>
+                                            <td>
+                                                @if (message.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Aktif</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Pasif</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Details" asp-route-id="@message.Id" 
+                                                       class="btn btn-sm btn-outline-info" title="Detaylar">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-warning" 
+                                                            onclick="toggleActive('@message.Id', @message.IsActive.ToString().ToLower())"
+                                                            title="@(message.IsActive ? "Durdur" : "Aktifleştir")">
+                                                        <i class="bi @(message.IsActive ? "bi-pause" : "bi-play")"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-clock display-1 text-muted"></i>
+                        <h4 class="mt-3">Henüz zamanlanmış mesajınız yok</h4>
+                        <p class="text-muted">İlk zamanlanmış mesajınızı oluşturmak için aşağıdaki butona tıklayın.</p>
+                        <a asp-action="Create" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> İlk Mesajınızı Oluşturun
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleActive(messageId, currentStatus) {
+            if (confirm(currentStatus ? 'Bu mesajı durdurmak istediğinizden emin misiniz?' : 'Bu mesajı aktifleştirmek istediğinizden emin misiniz?')) {
+                fetch('@Url.Action("ToggleActive")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    body: 'id=' + encodeURIComponent(messageId)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Hata: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('İşlem sırasında hata oluştu');
+                });
+            }
+        }
+    </script>
+} 

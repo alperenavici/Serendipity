@@ -34,13 +34,13 @@ builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IConversationParticipantRepository, ConversationParticipantRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMessageReadReceiptRepository, MessageReadReceiptRepository>();
-//builder.Services.AddScoped<IScheduleMessageRepository, ScheduleMessageRepository>();
+builder.Services.AddScoped<IScheduleMessageRepository, ScheduleMessageRepository>();
 
 // Register Services
 builder.Services.AddScoped<IConversationService, ConversationService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IUserService, UserService>();
-//builder.Services.AddScoped<IScheduleMessageService, ScheduleMessageService>();
+builder.Services.AddScoped<IScheduleMessageService, ScheduleMessageService>();
 
 var app = builder.Build();
 
@@ -58,7 +58,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.Use(async (context, next) =>
 {
-    // Önce isteðin normal þekilde iþlenmesine izin ver
+    // ï¿½nce isteï¿½in normal ï¿½ekilde iï¿½lenmesine izin ver
     await next.Invoke();
 
     if (context.User.Identity != null && context.User.Identity.IsAuthenticated)

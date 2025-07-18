@@ -39,6 +39,16 @@ namespace ConversationApp.Service.Services
             return await _unitOfWork.Users.GetByEmailAsync(email);
         }
 
+        public async Task<User> GetUserByIdAsync(Guid userId)
+        {
+            return await _unitOfWork.Users.GetByIdAsync(userId);
+        }
+
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            return await _unitOfWork.Users.GetAllAsync();
+        }
+
         public async Task<bool> IsEmailExistsAsync(string email)
         {
             return await _unitOfWork.Users.IsEmailExistsAsync(email);

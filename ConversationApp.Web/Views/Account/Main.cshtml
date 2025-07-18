@@ -31,6 +31,12 @@
             </form>
         </div>
 
+        <div class="action-buttons" style="padding: 10px 15px; border-bottom: 1px solid #e0e0e0;">
+            <a href="@Url.Action("Index", "ScheduleMessage")" class="btn btn-outline-primary btn-sm w-100" style="margin-bottom: 5px;">
+                <i class="fa-solid fa-clock"></i> Zamanlanmış Mesajlar
+            </a>
+        </div>
+
         <ul class="conversation-list">
             @if (Model.ConversationList != null && Model.ConversationList.Any())
             {

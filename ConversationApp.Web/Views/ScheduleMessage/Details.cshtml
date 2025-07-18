@@ -1,0 +1,230 @@
+@model ConversationApp.Web.Models.ScheduleMessageDetailsViewModel
+@{
+    ViewData["Title"] = "Zamanlanmış Mesaj Detayları";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-info-circle"></i> Zamanlanmış Mesaj Detayları</h2>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Geri Dön
+                </a>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-envelope"></i> @Model.Title
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Mesaj İçeriği:</label>
+                                <div class="p-3 bg-light rounded">
+                                    @Model.MessageContent
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Zamanlama Türü:</label>
+                                        <p class="mb-0">
+                                            @if (string.IsNullOrEmpty(Model.CronExpression))
+                                            {
+                                                <span class="badge bg-info">
+                                                    <i class="bi bi-clock"></i> Tek Seferlik
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning">
+                                                    <i class="bi bi-arrow-repeat"></i> Tekrarlanan
+                                                </span>
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Durum:</label>
+                                        <p class="mb-0">
+                                            <span class="@(Model.Status switch 
+                                            {
+                                                ConversationApp.Entity.Enums.ScheduleStatus.Pending => "badge bg-warning",
+                                                ConversationApp.Entity.Enums.ScheduleStatus.Active => "badge bg-primary",
+                                                ConversationApp.Entity.Enums.ScheduleStatus.Completed => "badge bg-success",
+                                                ConversationApp.Entity.Enums.ScheduleStatus.Paused => "badge bg-secondary",
+                                                ConversationApp.Entity.Enums.ScheduleStatus.Failed => "badge bg-danger",
+                                                _ => "badge bg-light"
+                                            })">
+                                                @Model.StatusText
+                                            </span>
+                                            @if (Model.IsActive)
+                                            {
+                                                <span class="badge bg-success ms-2">Aktif</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger ms-2">Pasif</span>
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.CronExpression))
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Cron İfadesi:</label>
+                                    <p class="mb-0">
+                                        <code class="bg-dark text-white p-2 rounded">@Model.CronExpression</code>
+                                    </p>
+                                </div>
+                            }
+
+                            @if (Model.RunOnceAt.HasValue)
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Planlanan Zaman:</label>
+                                    <p class="mb-0">@Model.RunOnceAt.Value.ToString("dd MMMM yyyy dddd HH:mm")</p>
+                                </div>
+                            }
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Sonraki Çalışma Zamanı:</label>
+                                        <p class="mb-0">
+                                            @Model.NextRunTime.ToString("dd MMMM yyyy dddd HH:mm")
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Son Çalışma Zamanı:</label>
+                                        <p class="mb-0">
+                                            @if (Model.LastRunTime.HasValue)
+                                            {
+                                                @Model.LastRunTime.Value.ToString("dd MMMM yyyy dddd HH:mm")
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Henüz çalışmadı</span>
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Oluşturulma Zamanı:</label>
+                                <p class="mb-0">@Model.CreatedOn.ToString("dd MMMM yyyy dddd HH:mm")</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">
+                                <i class="bi bi-people"></i> Hedef Kullanıcılar (@Model.Targets.Count)
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.Targets.Any())
+                            {
+                                <div class="list-group list-group-flush">
+                                    @foreach (var target in Model.Targets)
+                                    {
+                                        <div class="list-group-item px-0 py-2">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">@target.TargetUserName</h6>
+                                                    <small class="text-muted">@target.TargetUserEmail</small>
+                                                </div>
+                                                <div class="flex-shrink-0">
+                                                    <span class="badge bg-primary">
+                                                        <i class="bi bi-person"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted text-center">Hedef kullanıcı bulunamadı</p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">
+                                <i class="bi bi-gear"></i> İşlemler
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                @if (Model.IsActive)
+                                {
+                                    <button type="button" class="btn btn-warning" 
+                                            onclick="toggleActive('@Model.Id', true)">
+                                        <i class="bi bi-pause"></i> Durdur
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-success" 
+                                            onclick="toggleActive('@Model.Id', false)">
+                                        <i class="bi bi-play"></i> Aktifleştir
+                                    </button>
+                                }
+                                
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="bi bi-list"></i> Tüm Mesajlar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleActive(messageId, currentStatus) {
+            if (confirm(currentStatus ? 'Bu mesajı durdurmak istediğinizden emin misiniz?' : 'Bu mesajı aktifleştirmek istediğinizden emin misiniz?')) {
+                fetch('@Url.Action("ToggleActive")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    body: 'id=' + encodeURIComponent(messageId)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Hata: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('İşlem sırasında hata oluştu');
+                });
+            }
+        }
+    </script>
+} 

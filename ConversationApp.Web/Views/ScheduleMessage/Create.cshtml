@@ -1,0 +1,241 @@
+@model ConversationApp.Web.Models.CreateScheduleMessageViewModel
+@{
+    ViewData["Title"] = "Yeni Zamanlanmış Mesaj";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-plus-circle"></i> Yeni Zamanlanmış Mesaj</h2>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Geri Dön
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label asp-for="Title" class="form-label">Başlık</label>
+                                    <input asp-for="Title" class="form-control" placeholder="Mesaj başlığını girin" />
+                                    <span asp-validation-for="Title" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="MessageContent" class="form-label">Mesaj İçeriği</label>
+                                    <textarea asp-for="MessageContent" class="form-control" rows="4" 
+                                              placeholder="Gönderilecek mesajı yazın..."></textarea>
+                                    <span asp-validation-for="MessageContent" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Zamanlama Türü</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                @Html.RadioButtonFor(m => m.ScheduleType, ConversationApp.Web.Controllers.ScheduleType.Once, 
+                                                    new { @class = "form-check-input", id = "scheduleOnce", @checked = "checked" })
+                                                <label class="form-check-label" for="scheduleOnce">
+                                                    <i class="bi bi-clock"></i> Tek Seferlik
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                @Html.RadioButtonFor(m => m.ScheduleType, ConversationApp.Web.Controllers.ScheduleType.Recurring, 
+                                                    new { @class = "form-check-input", id = "scheduleRecurring" })
+                                                <label class="form-check-label" for="scheduleRecurring">
+                                                    <i class="bi bi-arrow-repeat"></i> Tekrarlanan
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span asp-validation-for="ScheduleType" class="text-danger"></span>
+                                </div>
+
+                                <div id="onceScheduleDiv" class="mb-3">
+                                    <label asp-for="RunOnceAt" class="form-label">Çalışma Zamanı</label>
+                                    <input asp-for="RunOnceAt" type="datetime-local" class="form-control" />
+                                    <span asp-validation-for="RunOnceAt" class="text-danger"></span>
+                                    <div class="form-text">Mesajın gönderileceği tarih ve saat</div>
+                                </div>
+
+                                <div id="recurringScheduleDiv" class="mb-3" style="display: none;">
+                                    <label class="form-label">Tekrarlama Sıklığı</label>
+                                    
+                                    <!-- Önceden tanımlanmış seçenekler -->
+                                    <div class="mb-3">
+                                        <select id="predefinedSchedule" class="form-select">
+                                            <option value="">Önceden tanımlanmış seçenekler...</option>
+                                            <option value="0 9 * * 1-5">Hafta içi her gün 09:00</option>
+                                            <option value="0 12 * * *">Her gün 12:00</option>
+                                            <option value="0 18 * * 5">Her Cuma 18:00</option>
+                                            <option value="0 0 1 * *">Her ayın 1'i gece yarısı</option>
+                                            <option value="0 */2 * * *">Her 2 saatte bir</option>
+                                            <option value="*/15 * * * *">Her 15 dakikada bir</option>
+                                            <option value="0 8 * * 1">Her Pazartesi 08:00</option>
+                                            <option value="0 17 * * 5">Her Cuma 17:00</option>
+                                            <option value="custom">Özel cron ifadesi</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Manuel cron ifadesi -->
+                                    <div id="customCronDiv" style="display: none;">
+                                        <label asp-for="CronExpression" class="form-label">Özel Cron İfadesi</label>
+                                        <input asp-for="CronExpression" class="form-control" placeholder="0 9 * * 1-5" />
+                                        <span asp-validation-for="CronExpression" class="text-danger"></span>
+                                        <div class="form-text">
+                                            <strong>Cron Format:</strong> dakika saat gün ay haftanın_günü<br/>
+                                            <small>
+                                                <code>0 9 * * 1-5</code> - Hafta içi her gün saat 09:00<br/>
+                                                <code>*/15 * * * *</code> - Her 15 dakikada bir<br/>
+                                                <code>0 12 * * *</code> - Her gün saat 12:00
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Hedef Kullanıcılar</label>
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="selectAll" class="form-check-input" />
+                                                <label class="form-check-label" for="selectAll">
+                                                    Tümünü Seç
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                                            @if (Model.AvailableUsers.Any())
+                                            {
+                                                @for (int i = 0; i < Model.AvailableUsers.Count; i++)
+                                                {
+                                                    var user = Model.AvailableUsers[i];
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" 
+                                                               name="SelectedUserIds" 
+                                                               value="@user.Id" 
+                                                               class="form-check-input user-checkbox" 
+                                                               id="user_@user.Id" />
+                                                        <label class="form-check-label" for="user_@user.Id">
+                                                            @user.DisplayName
+                                                        </label>
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <p class="text-muted">Kullanıcı bulunamadı</p>
+                                            }
+                                        </div>
+                                    </div>
+                                    <span asp-validation-for="SelectedUserIds" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <hr />
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle"></i> Oluştur
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            console.log('Page loaded, initializing schedule form...');
+            
+            // Zamanlama türü değişimini dinle
+            $('input[name="ScheduleType"]').change(function() {
+                var selectedType = $('input[name="ScheduleType"]:checked').val();
+                console.log('Schedule type changed to:', selectedType);
+                
+                if (selectedType == '@((int)ConversationApp.Web.Controllers.ScheduleType.Once)') {
+                    $('#onceScheduleDiv').show();
+                    $('#recurringScheduleDiv').hide();
+                    console.log('Showing once schedule div');
+                } else if (selectedType == '@((int)ConversationApp.Web.Controllers.ScheduleType.Recurring)') {
+                    $('#onceScheduleDiv').hide();
+                    $('#recurringScheduleDiv').show();
+                    console.log('Showing recurring schedule div');
+                }
+            });
+
+            // Default olarak "Tek Seferlik" seçili olsun
+            $('#scheduleOnce').prop('checked', true);
+            $('#onceScheduleDiv').show();
+            $('#recurringScheduleDiv').hide();
+
+            // Predefined schedule dropdown değişimini dinle
+            $('#predefinedSchedule').change(function() {
+                var selectedValue = $(this).val();
+                console.log('Predefined schedule changed to:', selectedValue);
+                
+                if (selectedValue === 'custom') {
+                    $('#customCronDiv').show();
+                    $('#CronExpression').val('');
+                } else if (selectedValue !== '') {
+                    $('#customCronDiv').hide();
+                    $('#CronExpression').val(selectedValue);
+                } else {
+                    $('#customCronDiv').hide();
+                    $('#CronExpression').val('');
+                }
+            });
+
+            // Sayfa yüklendiğinde seçili durumu kontrol et
+            setTimeout(function() {
+                $('input[name="ScheduleType"]:checked').trigger('change');
+            }, 100);
+
+            // Tümünü seç/seçme işlevi
+            $('#selectAll').change(function() {
+                $('.user-checkbox').prop('checked', this.checked);
+            });
+
+            // Bireysel checkbox değişimlerini dinle
+            $('.user-checkbox').change(function() {
+                var totalCheckboxes = $('.user-checkbox').length;
+                var checkedCheckboxes = $('.user-checkbox:checked').length;
+                
+                $('#selectAll').prop('checked', totalCheckboxes === checkedCheckboxes);
+            });
+
+            // Minimum tarih olarak şu anı ayarla
+            var now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            var minDateTime = now.toISOString().slice(0, 16);
+            $('#RunOnceAt').attr('min', minDateTime);
+            
+            // Default tarih olarak 2 dakika sonrasını ayarla (test için)
+            now.setMinutes(now.getMinutes() + 2);
+            var defaultDateTime = now.toISOString().slice(0, 16);
+            $('#RunOnceAt').val(defaultDateTime);
+            
+            console.log('Min datetime:', minDateTime);
+            console.log('Default datetime:', defaultDateTime);
+        });
+    </script>
+} 

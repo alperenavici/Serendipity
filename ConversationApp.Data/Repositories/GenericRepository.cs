@@ -106,5 +106,15 @@ namespace ConversationApp.Data.Repositories
         {
             return await _dbSet.Where(expression).AsNoTracking().ToListAsync();
         }
+
+        public virtual async Task AddAsync(T entity)
+        {
+            await _dbSet.AddAsync(entity);
+        }
+
+        public virtual async Task AddRangeAsync(IEnumerable<T> entities)
+        {
+            await _dbSet.AddRangeAsync(entities);
+        }
     }
 } 

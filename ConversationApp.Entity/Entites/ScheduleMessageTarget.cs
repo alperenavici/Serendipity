@@ -8,7 +8,7 @@ namespace ConversationApp.Entity.Entites
 {
     public class ScheduleMessageTarget
     {
-        public Guid SchedduleMessageId { get; set; }
+        public Guid ScheduleMessageId { get; set; }
         public Guid TargetUserId { get; set; }
 
         public virtual ScheduleMessage ScheduleMessage { get; set; }

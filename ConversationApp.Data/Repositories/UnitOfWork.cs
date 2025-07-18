@@ -1,5 +1,6 @@
 using ConversationApp.Data.Context;
 using ConversationApp.Data.Interfaces;
+using ConversationApp.Entity.Entites;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Threading.Tasks;
@@ -40,8 +41,8 @@ namespace ConversationApp.Data.Repositories
         public IMessageReadReceiptRepository MessageReadReceipts => 
             _messageReadReceipts ??= new MessageReadReceiptRepository(_context);
 
-        //public IScheduleMessageRepository ScheduleMessages => 
-        //    _scheduleMessages ??= new ScheduleMessageRepository(_context);
+        public IScheduleMessageRepository ScheduleMessages => 
+            _scheduleMessages ??= new ScheduleMessageRepository(_context);
 
         // Transaction methods
         public async Task<int> SaveChangesAsync()
@@ -92,6 +93,11 @@ namespace ConversationApp.Data.Repositories
                 await _transaction.DisposeAsync();
                 _transaction = null;
             }
+        }
+
+        public async Task AddAsync(ScheduleMessage entity)
+        {
+            await _context.ScheduleMessages.AddAsync(entity);
         }
 
         public async Task CommitAsync()

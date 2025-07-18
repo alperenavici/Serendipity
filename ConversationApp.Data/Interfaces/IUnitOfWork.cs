@@ -1,3 +1,4 @@
+using ConversationApp.Entity.Entites;
 using System;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace ConversationApp.Data.Interfaces
         IConversationParticipantRepository ConversationParticipants { get; }
         IUserRepository Users { get; }
         IMessageReadReceiptRepository MessageReadReceipts { get; }
-        //IScheduleMessageRepository ScheduleMessages { get; }
+        IScheduleMessageRepository ScheduleMessages { get; }
 
         // Transaction methods
         Task<int> SaveChangesAsync();
@@ -20,5 +21,7 @@ namespace ConversationApp.Data.Interfaces
         Task CommitTransactionAsync();
         Task RollbackTransactionAsync();
         Task CommitAsync();
+        Task AddAsync(ScheduleMessage entity);
+
     }
 } 

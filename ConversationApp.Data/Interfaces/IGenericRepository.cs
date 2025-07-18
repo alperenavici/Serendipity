@@ -28,7 +28,7 @@ namespace ConversationApp.Data.Interfaces
         Task<int> CountAsync(Expression<Func<T, bool>> expression = null);
         Task<List<T>> GetAllAsync();
         Task<List<T>> GetWhereAsync(Expression<Func<T, bool>> expression);
-
-
+        Task AddAsync(T entity);
+        Task AddRangeAsync(IEnumerable<T> entities);
     }
 } 

@@ -14,5 +14,6 @@ namespace ConversationApp.Data.Interfaces
         Task<List<ScheduleMessage>> GetEnabledScheduledMessagesAsync();
         Task<ScheduleMessage> GetScheduledMessageByIdAsync(Guid scheduleMessageId);
         Task UpdateScheduleMessageStatusAsync(Guid scheduleMessageId, int status);
+        Task UpdateNextRunTimeAsync(Guid scheduleMessageId, DateTime nextRunTime);
     }
 } 

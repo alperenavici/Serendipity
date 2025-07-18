@@ -11,6 +11,8 @@ namespace ConversationApp.Service.Interfaces
         Task<List<User>> GetActiveUsersExceptAsync(Guid excludeUserId);
         Task<User> GetUserByUsernameAsync(string username);
         Task<User> GetUserByEmailAsync(string email);
+        Task<User> GetUserByIdAsync(Guid userId);
+        Task<List<User>> GetAllUsersAsync();
         Task<bool> IsEmailExistsAsync(string email);
         Task<bool> IsUsernameExistsAsync(string username);
         Task<List<User>> GetUsersByRoleAsync(int role);

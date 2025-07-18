@@ -8,6 +8,7 @@ namespace ConversationApp.Service.Interfaces
     public interface IScheduleMessageService
     {
         Task<ScheduleMessage> CreateScheduleMessageAsync(Guid createdByUserId, Guid? targetUserId, string messageText, DateTime scheduledTime);
+        Task<ScheduleMessage> CreateScheduleMessageWithMultipleTargetsAsync(Guid createdByUserId, List<Guid> targetUserIds, string title, string messageContent, DateTime scheduledTime, string? cronExpression = null);
         Task<List<ScheduleMessage>> GetUserScheduledMessagesAsync(Guid userId);
         Task<List<ScheduleMessage>> GetScheduledMessagesForUserAsync(Guid targetUserId);
         Task<List<ScheduleMessage>> GetPendingScheduledMessagesAsync();

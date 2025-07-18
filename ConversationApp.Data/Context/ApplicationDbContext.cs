@@ -22,6 +22,7 @@ namespace ConversationApp.Data.Context
         public DbSet<MessageReadReceipt> MessageReadReceipts { get; set; }
         public DbSet<ScheduleMessage> ScheduleMessages { get; set; }
         public DbSet<ScheduleMessageTarget> ScheduleMessageTargets { get; set; }
+        public DbSet<User> User { get; set; } // IdentityDbContext already includes a Users DbSet, but you can define it explicitly if needed.
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -103,10 +104,7 @@ namespace ConversationApp.Data.Context
                 entity.Property(sm => sm.NextRunTime).IsRequired();
                 entity.Property(sm => sm.Status).IsRequired();
 
-                entity.HasOne(sm => sm.CreatedByUser)
-                    .WithMany(u => u.CreatedScheduledMessages)
-                    .HasForeignKey(sm => sm.CreatedByUserId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                
 
                 entity.HasOne(sm => sm.CreatedByUser)
                     .WithMany(u => u.CreatedScheduledMessages)
@@ -116,10 +114,10 @@ namespace ConversationApp.Data.Context
 
             modelBuilder.Entity<ScheduleMessageTarget>(entity =>
             {
-                entity.HasKey(st => new {st.SchedduleMessageId, st.TargetUserId});
+                entity.HasKey(st => new {st.ScheduleMessageId, st.TargetUserId});
                 entity.HasOne(st=>st.ScheduleMessage)
                     .WithMany(sm => sm.Targets)
-                    .HasForeignKey(st => st.SchedduleMessageId)
+                    .HasForeignKey(st => st.ScheduleMessageId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(st => st.TargetUser)
