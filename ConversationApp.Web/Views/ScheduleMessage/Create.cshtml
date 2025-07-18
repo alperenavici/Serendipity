@@ -68,7 +68,7 @@
                                 <div id="recurringScheduleDiv" class="mb-3" style="display: none;">
                                     <label class="form-label">Tekrarlama Sıklığı</label>
                                     
-                                    <!-- Önceden tanımlanmış seçenekler -->
+                                    
                                     <div class="mb-3">
                                         <select id="predefinedSchedule" class="form-select" required>
                                             <option value="">Tekrarlama sıklığı seçin...</option>
@@ -160,94 +160,79 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
     <script>
         $(document).ready(function() {
-            console.log('Page loaded, initializing schedule form...');
-            
-            // Zamanlama türü değişimini dinle
             $('input[name="ScheduleType"]').change(function() {
                 var selectedType = $('input[name="ScheduleType"]:checked').val();
-                console.log('Schedule type changed to:', selectedType);
-                
-                if (selectedType == '@((int)ConversationApp.Web.Controllers.ScheduleType.Once)') {
+
+                if (selectedType == '@(ConversationApp.Web.Controllers.ScheduleType.Once.ToString())') {
                     $('#onceScheduleDiv').show();
                     $('#recurringScheduleDiv').hide();
-                    console.log('Showing once schedule div');
-                } else if (selectedType == '@((int)ConversationApp.Web.Controllers.ScheduleType.Recurring)') {
+                } else if (selectedType == '@(ConversationApp.Web.Controllers.ScheduleType.Recurring.ToString())') {
                     $('#onceScheduleDiv').hide();
                     $('#recurringScheduleDiv').show();
-                    console.log('Showing recurring schedule div');
                 }
             });
 
-            $('#scheduleOnce').prop('checked', true);
-            $('#onceScheduleDiv').show();
-            $('#recurringScheduleDiv').hide();
+            $('#scheduleOnce').prop('checked', true).trigger('change');
 
             $('#predefinedSchedule').change(function() {
                 var selectedValue = $(this).val();
-                console.log('Predefined schedule changed to:', selectedValue);
-                
+
                 if (selectedValue === 'custom') {
                     $('#customCronDiv').show();
                     $('#CronExpression').val('');
                 } else if (selectedValue !== '') {
                     $('#customCronDiv').hide();
-                    $('#CronExpression').val(selectedValue);
+                    $('#CronExpression').val(selectedValue); 
                 } else {
                     $('#customCronDiv').hide();
-                    $('#CronExpression').val('');
+                    $('#CronExpression').val(''); 
                 }
             });
-
-            setTimeout(function() {
-                $('input[name="ScheduleType"]:checked').trigger('change');
-            }, 100);
 
             $('#selectAll').change(function() {
                 $('.user-checkbox').prop('checked', this.checked);
             });
 
-            // Bireysel checkbox değişimlerini dinle
             $('.user-checkbox').change(function() {
-                var totalCheckboxes = $('.user-checkbox').length;
-                var checkedCheckboxes = $('.user-checkbox:checked').length;
-                
-                $('#selectAll').prop('checked', totalCheckboxes === checkedCheckboxes);
+                if ($('.user-checkbox:checked').length == $('.user-checkbox').length) {
+                    $('#selectAll').prop('checked', true);
+                } else {
+                    $('#selectAll').prop('checked', false);
+                }
             });
 
-            // Minimum tarih olarak şu anı ayarla
             var now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             var minDateTime = now.toISOString().slice(0, 16);
             $('#RunOnceAt').attr('min', minDateTime);
-            
-            // Default tarih olarak 2 dakika sonrasını ayarla (test için)
-            now.setMinutes(now.getMinutes() + 2);
+
+            now.setMinutes(now.getMinutes() + 5 + now.getTimezoneOffset()); 
             var defaultDateTime = now.toISOString().slice(0, 16);
             $('#RunOnceAt').val(defaultDateTime);
-            
-            console.log('Min datetime:', minDateTime);
-            console.log('Default datetime:', defaultDateTime);
 
             $('form').on('submit', function(e) {
                 var scheduleType = $('input[name="ScheduleType"]:checked').val();
-                if (scheduleType == '@((int)ConversationApp.Web.Controllers.ScheduleType.Recurring)') {
+
+                if (scheduleType == '@(ConversationApp.Web.Controllers.ScheduleType.Recurring.ToString())') {
                     var selectedValue = $('#predefinedSchedule').val();
                     if (!selectedValue) {
                         alert('Lütfen bir tekrar sıklığı seçin.');
-                        e.preventDefault();
+                        e.preventDefault(); 
                         return false;
                     }
                     if (selectedValue === 'custom' && !$('#CronExpression').val()) {
-                        alert('Lütfen özel cron ifadesi girin.');
-                        e.preventDefault();
+                        alert('Lütfen özel cron ifadesini girin.');
+                        e.preventDefault(); 
                         return false;
                     }
                 }
             });
         });
     </script>
-} 
+}c
