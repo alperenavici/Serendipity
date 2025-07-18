@@ -22,7 +22,6 @@ namespace ConversationApp.Web.Controllers
             _logger = logger;
         }
 
-        // Ana sayfa - kullanıcının zamanlanmış mesajları
         public async Task<IActionResult> Index()
         {
             try
@@ -65,7 +64,6 @@ namespace ConversationApp.Web.Controllers
             try
             {
                 var users = await _userService.GetAllUsersAsync();
-                // Türkiye saatinde 2 dakika sonrasını default olarak ayarla
                 TimeZoneInfo turkeyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
                 DateTime turkeyNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, turkeyTimeZone);
                 DateTime defaultRunTime = turkeyNow.AddMinutes(2);
@@ -92,7 +90,6 @@ namespace ConversationApp.Web.Controllers
             }
         }
 
-        // Yeni zamanlanmış mesaj oluşturma
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateScheduleMessageViewModel model)
@@ -101,7 +98,6 @@ namespace ConversationApp.Web.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    // Hata durumunda kullanıcı listesini tekrar yükle
                     var users = await _userService.GetAllUsersAsync();
                     model.AvailableUsers = users.Select(u => new UserSelectViewModel
                     {
@@ -120,7 +116,6 @@ namespace ConversationApp.Web.Controllers
                 {
                     if (model.RunOnceAt.HasValue)
                     {
-                        // DateTime-local input'tan gelen değer local time'dır, UTC'ye convert edelim
                         scheduledTime = DateTime.SpecifyKind(model.RunOnceAt.Value, DateTimeKind.Local).ToUniversalTime();
                     }
                     else
@@ -138,7 +133,6 @@ namespace ConversationApp.Web.Controllers
                     scheduledTime = DateTime.UtcNow.AddMinutes(2);
                 }
 
-                // Zamanlanmış mesajı birden fazla hedefle oluştur
                 await _scheduleMessageService.CreateScheduleMessageWithMultipleTargetsAsync(
                     userId, 
                     model.SelectedUserIds, 
@@ -155,7 +149,6 @@ namespace ConversationApp.Web.Controllers
                 _logger.LogError(ex, "Zamanlanmış mesaj oluşturulurken hata oluştu");
                 TempData["ErrorMessage"] = "Mesaj oluşturulurken hata oluştu";
 
-                // Hata durumunda kullanıcı listesini tekrar yükle
                 var users = await _userService.GetAllUsersAsync();
                 model.AvailableUsers = users.Select(u => new UserSelectViewModel
                 {
@@ -166,7 +159,6 @@ namespace ConversationApp.Web.Controllers
             }
         }
 
-        // Zamanlanmış mesaj detayları
         [HttpGet]
         public async Task<IActionResult> Details(Guid id)
         {
@@ -212,7 +204,6 @@ namespace ConversationApp.Web.Controllers
             }
         }
 
-        // Zamanlanmış mesajı durdur/aktifleştir
         [HttpPost]
         public async Task<IActionResult> ToggleActive(Guid id)
         {
@@ -262,7 +253,6 @@ namespace ConversationApp.Web.Controllers
         {
             try
             {
-                // NCronTab kullanarak sonraki çalışma zamanını hesapla
                 var crontab = NCrontab.CrontabSchedule.Parse(cronExpression);
                 return crontab.GetNextOccurrence(DateTime.UtcNow);
             }
@@ -273,7 +263,6 @@ namespace ConversationApp.Web.Controllers
         }
     }
 
-    // Enum for schedule types
     public enum ScheduleType
     {
         Once = 1,

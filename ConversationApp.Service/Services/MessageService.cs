@@ -42,35 +42,13 @@ namespace ConversationApp.Service.Services
             
             // Sistem kullanıcısını kontrol et/oluştur
             var systemUser = await _unitOfWork.Users.GetByIdAsync(systemUserId);
-            if (systemUser == null)
-            {
-                // Sistem kullanıcısını oluştur
-                systemUser = new User
-                {
-                    Id = systemUserId,
-                    UserName = "System",
-                    NormalizedUserName = "SYSTEM",
-                    Email = "system@serendipity.com",
-                    NormalizedEmail = "SYSTEM@SERENDIPITY.COM",
-                    EmailConfirmed = true,
-                    PasswordHash = "AQAAAAEAACcQAAAAEDummyPasswordHashForSystemUser", // Dummy hash for system user
-                    SecurityStamp = Guid.NewGuid().ToString(),
-                    ConcurrencyStamp = Guid.NewGuid().ToString(),
-                    CreationDate = DateTime.UtcNow,
-                    Role = 1, // Admin
-                    IsBanned = false,
-                    IsDeleted = false
-                };
-                
-                _unitOfWork.Users.Add(systemUser);
-                await _unitOfWork.SaveChangesAsync();
-            }
+            
 
             // Sistem ile hedef kullanıcı arasında conversation bul/oluştur
             var conversation = await FindOrCreateSystemConversationAsync(systemUserId, targetUserId);
             
             // Başlık ve içeriği birleştir
-            var fullContent = string.IsNullOrEmpty(title) ? content : $"📬 {title}\n\n{content}";
+            var fullContent = string.IsNullOrEmpty(title) ? content : $"{title}\n\n{content}";
             
             // Mesajı gönder
             var message = new Message
@@ -90,7 +68,6 @@ namespace ConversationApp.Service.Services
 
         private async Task<ConversationApp.Entity.Entites.Conversation> FindOrCreateSystemConversationAsync(Guid systemUserId, Guid targetUserId)
         {
-            // Sistem kullanıcısı ile hedef kullanıcı arasında mevcut conversation'ı bul
             var existingConversation = await _unitOfWork.Conversations.GetPrivateConversationBetweenUsersAsync(systemUserId, targetUserId);
             
             if (existingConversation != null)
@@ -98,7 +75,6 @@ namespace ConversationApp.Service.Services
                 return existingConversation;
             }
 
-            // Yeni conversation oluştur
             var conversation = new Entity.Entites.Conversation
             {
                 Id = Guid.NewGuid(),
@@ -109,7 +85,6 @@ namespace ConversationApp.Service.Services
 
             _unitOfWork.Conversations.Add(conversation);
 
-            // Sistem kullanıcısını participant olarak ekle
             var systemParticipant = new ConversationParticipant
             {
                 ConversationId = conversation.Id,
@@ -117,7 +92,6 @@ namespace ConversationApp.Service.Services
                 JoinedDate = DateTime.UtcNow
             };
 
-            // Hedef kullanıcıyı participant olarak ekle
             var targetParticipant = new ConversationParticipant
             {
                 ConversationId = conversation.Id,
@@ -186,7 +160,7 @@ namespace ConversationApp.Service.Services
             return await _unitOfWork.Messages.SearchMessagesInConversationAsync(conversationId, searchTerm);
         }
 
-        // Admin Dashboard �statistikleri
+        // Admin Dashboard statistikleri
         public async Task<List<int>> GetMonthlyMessageCountsAsync()
         {
             return await _unitOfWork.Messages.GetMonthlyMessageCountsAsync();
@@ -206,6 +180,66 @@ namespace ConversationApp.Service.Services
                 return currentPeriodCount > 0 ? 100 : 0;
 
             return ((double)(currentPeriodCount - previousPeriodCount) / previousPeriodCount) * 100;
+        }
+
+        public async Task<Message> SendUserMessageAsync(Guid senderUserId, Guid targetUserId, string title, string content)
+        {
+            var conversation = await FindOrCreateConversationAsync(senderUserId, targetUserId);
+
+            var fullContent = string.IsNullOrEmpty(title) ? content : $"📬 {title}\n\n{content}";
+
+            var message = new Message
+            {
+                Id = Guid.NewGuid(),
+                ConversationId = conversation.Id,
+                UserId = senderUserId,
+                Content = fullContent,
+                SentDate = DateTime.UtcNow
+            };
+
+            _unitOfWork.Messages.Add(message);
+            await _unitOfWork.SaveChangesAsync();
+
+            return message;
+        }
+
+        private async Task<ConversationApp.Entity.Entites.Conversation> FindOrCreateConversationAsync(Guid user1Id, Guid user2Id)
+        {
+            var existingConversation = await _unitOfWork.Conversations.GetPrivateConversationBetweenUsersAsync(user1Id, user2Id);
+            if (existingConversation != null)
+            {
+                return existingConversation;
+            }
+
+            var conversation = new ConversationApp.Entity.Entites.Conversation
+            {
+                Id = Guid.NewGuid(),
+                Title = $"{await GetUserNameAsync(user1Id)} - {await GetUserNameAsync(user2Id)}",
+                Type = 0, // 0: Private, 1: Group
+                CreationDate = DateTime.UtcNow
+            };
+
+            _unitOfWork.Conversations.Add(conversation);
+
+            var participant1 = new ConversationParticipant
+            {
+                ConversationId = conversation.Id,
+                UserId = user1Id,
+                JoinedDate = DateTime.UtcNow
+            };
+            var participant2 = new ConversationParticipant
+            {
+                ConversationId = conversation.Id,
+                UserId = user2Id,
+                JoinedDate = DateTime.UtcNow
+            };
+
+            _unitOfWork.ConversationParticipants.Add(participant1);
+            _unitOfWork.ConversationParticipants.Add(participant2);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return conversation;
         }
     }
 } 

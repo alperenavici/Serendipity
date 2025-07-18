@@ -1,8 +1,7 @@
-// ConversationApp.Service/ScheduleMessageService.cs
-using ConversationApp.Data.Interfaces; // IScheduleMessageRepository için
+using ConversationApp.Data.Interfaces; 
 using ConversationApp.Entity.Entites;
-using ConversationApp.Entity.Enums; // ScheduleStatus için
-using ConversationApp.Service.Interfaces; // IScheduleMessageService için (kendi arayüzünüz)
+using ConversationApp.Entity.Enums; 
+using ConversationApp.Service.Interfaces; 
 using Microsoft.Extensions.Logging;
 
 namespace ConversationApp.Service.Services
@@ -175,14 +174,12 @@ namespace ConversationApp.Service.Services
         {
             var now = DateTime.UtcNow;
 
-            // 1. Zamanı gelen mesajları al
             var dueMessages = await _scheduleMessageRepository.GetScheduledMessagesDueAsync(now);
 
             foreach (var message in dueMessages)
             {
                 try
                 {
-                    // Mesajın durumunu Active olarak güncelle (Worker tarafından işleniyor demek)
                     await _scheduleMessageRepository.UpdateScheduleMessageStatusAsync(message.Id, (int)ScheduleStatus.Active);
                     await _unitOfWork.CommitAsync();
                     

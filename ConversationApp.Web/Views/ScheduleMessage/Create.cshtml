@@ -70,8 +70,8 @@
                                     
                                     <!-- Önceden tanımlanmış seçenekler -->
                                     <div class="mb-3">
-                                        <select id="predefinedSchedule" class="form-select">
-                                            <option value="">Önceden tanımlanmış seçenekler...</option>
+                                        <select id="predefinedSchedule" class="form-select" required>
+                                            <option value="">Tekrarlama sıklığı seçin...</option>
                                             <option value="0 9 * * 1-5">Hafta içi her gün 09:00</option>
                                             <option value="0 12 * * *">Her gün 12:00</option>
                                             <option value="0 18 * * 5">Her Cuma 18:00</option>
@@ -84,7 +84,6 @@
                                         </select>
                                     </div>
 
-                                    <!-- Manuel cron ifadesi -->
                                     <div id="customCronDiv" style="display: none;">
                                         <label asp-for="CronExpression" class="form-label">Özel Cron İfadesi</label>
                                         <input asp-for="CronExpression" class="form-control" placeholder="0 9 * * 1-5" />
@@ -183,12 +182,10 @@
                 }
             });
 
-            // Default olarak "Tek Seferlik" seçili olsun
             $('#scheduleOnce').prop('checked', true);
             $('#onceScheduleDiv').show();
             $('#recurringScheduleDiv').hide();
 
-            // Predefined schedule dropdown değişimini dinle
             $('#predefinedSchedule').change(function() {
                 var selectedValue = $(this).val();
                 console.log('Predefined schedule changed to:', selectedValue);
@@ -205,12 +202,10 @@
                 }
             });
 
-            // Sayfa yüklendiğinde seçili durumu kontrol et
             setTimeout(function() {
                 $('input[name="ScheduleType"]:checked').trigger('change');
             }, 100);
 
-            // Tümünü seç/seçme işlevi
             $('#selectAll').change(function() {
                 $('.user-checkbox').prop('checked', this.checked);
             });
@@ -236,6 +231,23 @@
             
             console.log('Min datetime:', minDateTime);
             console.log('Default datetime:', defaultDateTime);
+
+            $('form').on('submit', function(e) {
+                var scheduleType = $('input[name="ScheduleType"]:checked').val();
+                if (scheduleType == '@((int)ConversationApp.Web.Controllers.ScheduleType.Recurring)') {
+                    var selectedValue = $('#predefinedSchedule').val();
+                    if (!selectedValue) {
+                        alert('Lütfen bir tekrar sıklığı seçin.');
+                        e.preventDefault();
+                        return false;
+                    }
+                    if (selectedValue === 'custom' && !$('#CronExpression').val()) {
+                        alert('Lütfen özel cron ifadesi girin.');
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+            });
         });
     </script>
 } 
